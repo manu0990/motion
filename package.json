@@ -4,21 +4,23 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "restart": "rm -rf .next && rm -rf node_modules && pnpx prisma:gen && pnpm dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "prisma:gen": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name",
     "prisma:migrate:prod": "prisma migrate deploy",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "restart": "rm -rf .next && rm -rf node_modules && pnpm i && pnpm run prisma:gen && pnpm run dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@next-auth/prisma-adapter": "^1.0.7",
     "@prisma/client": "6.8.2",
+    "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tabs": "^1.1.12",
     "axios": "^1.9.0",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",

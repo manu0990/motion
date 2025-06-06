@@ -1,7 +1,19 @@
-export default function Landing() {
+import { Navbar } from '@/components/layout/navbar';
+import { Hero } from '@/components/landing/hero';
+import { Features } from '@/components/landing/features';
+import { FAQ } from '@/components/landing/faq';
+import { CallToAction } from '@/components/landing/call-to-action';
+import { Footer } from '@/components/layout/footer';
+
+export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      The landing page to be here.
+    <div className="flex min-h-screen flex-col">
+      <Navbar />
+      <Hero />
+      <Features />
+      <FAQ />
+      <CallToAction />
+      <Footer />
     </div>
   );
 }
