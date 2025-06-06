@@ -1,0 +1,43 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+  "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+     width="428pt" height="386pt" viewBox="0 0 428 386"
+     preserveAspectRatio="xMidYMid meet">
+
+  <!-- Define a mask where white = opaque, black = transparent -->
+  <mask id="cutout-mask">
+    <!-- Full‐canvas white so everything starts opaque -->
+    <rect x="0" y="0" width="428" height="386" fill="#ffffff"/>
+
+    <!-- Draw the original shape in black (fill) plus a black stroke to slightly enlarge the transparent area -->
+    <g transform="translate(0,386) scale(0.1,-0.1)">
+      <path
+        fill="#000000"
+        stroke="#000000"
+        stroke-width="20"
+        stroke-linejoin="round"
+        d="M0 1930 l0 -1930 2140 0 2140 0 0 1930 0 1930 -2140 0 -2140 0 0
+        -1930z m3487 1749 c184 -25 340 -105 470 -243 91 -96 151 -200 182 -317 18
+        -70 20 -121 25 -984 3 -500 9 -1136 12 -1412 l7 -503 -167 0 -166 0 0 158 c1
+        586 -22 2529 -31 2586 -28 194 -186 355 -382 389 -122 20 -258 -23 -344 -110
+        -36 -36 -112 -161 -302 -496 l-253 -447 -82 0 -82 0 -21 43 c-57 116 -498 876
+        -525 904 -17 17 -52 41 -79 52 -47 21 -61 21 -563 19 l-515 -3 211 -335 c116
+        -184 267 -425 336 -535 69 -110 190 -303 270 -429 81 -129 142 -236 139 -245
+        -2 -9 -143 -212 -312 -451 -449 -634 -535 -757 -535 -764 0 -3 308 -5 686 -4
+        l685 3 106 253 106 252 178 0 c99 0 179 -4 179 -9 0 -5 -79 -193 -175 -417
+        l-174 -409 -1121 -3 -1121 -2 57 82 c56 80 237 335 412 583 47 66 111 156 142
+        200 31 44 154 219 275 389 l218 310 -20 35 c-11 20 -102 167 -203 326 -431
+        683 -806 1285 -841 1350 -21 39 -45 90 -53 113 l-15 42 877 -2 877 -3 57 -28
+        c72 -35 149 -104 197 -176 20 -31 107 -176 192 -323 85 -148 157 -268 160
+        -268 3 0 18 24 34 53 15 28 87 156 158 282 115 204 139 239 206 305 158 158
+        377 224 628 189z"/>
+    </g>
+  </mask>
+
+  <!-- Draw white background, applying the mask so the black‐filled shape (plus stroke) becomes transparent -->
+  <rect x="0" y="0" width="428" height="386"
+        fill="#ffffff"
+        mask="url(#cutout-mask)" />
+
+</svg>
