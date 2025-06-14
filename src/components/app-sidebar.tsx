@@ -1,3 +1,5 @@
+"use client"
+
 import { Edit, Search } from "lucide-react"
 import {
   Sidebar,
@@ -12,12 +14,14 @@ import {
 } from "@/components/ui/sidebar"
 import Image from "next/image"
 import Link from "next/link"
+import useSWR from "swr";
+import { usePathname } from "next/navigation"
 
 // Menu items.
 const items = [
   {
     title: "New chat",
-    url: "/new_chat",
+    url: "/chat",
     icon: Edit,
   },
   {
@@ -27,7 +31,21 @@ const items = [
   },
 ]
 
+type ConversationType = {
+  id: string;
+  title: string;
+}
+
+const fetcher = (url: string) =>
+  fetch(url).then((res) => {
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    return res.json();
+  });
+
 export function AppSidebar() {
+  const { data: conversations = [] } = useSWR<ConversationType[]>("/api/conversations", fetcher);
+  const pathName = usePathname();
+
   return (
     <Sidebar>
       <SidebarContent className="p-1">
@@ -43,10 +61,10 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -58,13 +76,16 @@ export function AppSidebar() {
           <SidebarGroupLabel className="text-sm">Chats</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem key={0}>
-                <SidebarMenuButton asChild>
-                  <Link href="/hi">
-                    <span>Titlejh kudsfjsdf</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {conversations.map((c: ConversationType) => {
+                const isActive = pathName === `/chat/${c.id}`;
+                return (
+                  <SidebarMenuItem key={c.id} className={`-mb-1 rounded-lg text-sm leading-3 font-sans hover:bg-sidebar-accent ${isActive ? "bg-sidebar-accent" : ""}`}>
+                    <Link href={`/chat/${c.id}`} className="truncate block py-3 px-2 ">
+                      {c.title || "Untitled Chat"}
+                    </Link>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

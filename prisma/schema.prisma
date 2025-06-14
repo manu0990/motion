@@ -62,6 +62,7 @@ model Conversation {
   id        String    @id @default(uuid())
   user      User      @relation(fields: [userId], references: [id])
   userId    String
+  title     String    @default("New Chat")
   messages  Message[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

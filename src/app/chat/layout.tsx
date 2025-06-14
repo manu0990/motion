@@ -15,6 +15,8 @@ export function SidebarToggle() {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const session = useSession();
   const user = session.data?.user;
+
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen transition ease-in-out overflow-x-hidden">
