@@ -14,7 +14,7 @@ export function CallToAction() {
             Start creating beautiful mathematical animations today. No coding required.
           </p>
           <div className="mt-10">
-            <Link href="/chat">
+            <Link href="/new_chat">
               <Button size="lg" variant="secondary" className="font-semibold">
                 Start Creating Now
                 <ArrowRight className="ml-2 h-4 w-4" />

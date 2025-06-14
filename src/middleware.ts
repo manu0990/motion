@@ -4,7 +4,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const sessionToken = request.cookies.get('next-auth.session-token')?.value || request.cookies.get('__Secure-next-auth.session-token')?.value;
 
-  const protectedPaths = ['/home', '/api/auth/signout'];
+  const protectedPaths = ['/api/auth/signout', '/chat', '/chat/:path*'];
   const publicPath = ['/', '/auth/signin', '/auth/signup'];
 
   const isprotectedPath = protectedPaths.includes(path);
@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (sessionToken && isPublicPath) {
-    return NextResponse.redirect(new URL('/home', request.url));
+    return NextResponse.redirect(new URL('/chat', request.url));
   }
   if (path === '/api/auth/signout' && !sessionToken) {
     return NextResponse.redirect(new URL('/auth/signin', request.url));
@@ -30,7 +30,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/",
-    "/home",
+    "/chat",
+    "/chat/:path*",
     "/api/auth/signout",
     "/auth/signin",
     "/verify/:path*",

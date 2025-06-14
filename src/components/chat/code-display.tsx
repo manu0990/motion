@@ -16,7 +16,7 @@ export function CodeDisplay({ code, language }: CodeDisplayProps) {
 
   useEffect(() => {
     if (copied) {
-      const timeout = setTimeout(() => setCopied(false), 2000);
+      const timeout = setTimeout(() => setCopied(false), 3000);
       return () => clearTimeout(timeout);
     }
   }, [copied]);

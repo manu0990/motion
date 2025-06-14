@@ -1,5 +1,3 @@
-// schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,15 +8,84 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(cuid())
-  name           String    @default(cuid())
-  email          String    @unique
-  emailVerified  DateTime? @map("email_verified")
-  image          String?
-  role           Role      @default(USER)
+  id            String    @id @default(cuid())
+  name          String    @default(cuid())
+  email         String    @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  role          Role      @default(USER)
 
-  accounts       Account[]
-  sessions       Session[]
+  accounts     Account[]
+  sessions     Session[]
+  conversation Conversation[]
+}
+
+model Account {
+  id                 Int     @id @default(autoincrement())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @map("refresh_token")
+  access_token       String? @map("access_token")
+  expires_at         Int?    @map("expires_at")
+  token_type         String? @map("token_type")
+  scope              String?
+  id_token           String? @map("id_token")
+  session_state      String? @map("session_state")
+  oauth_token_secret String? @map("oauth_token_secret")
+  oauth_token        String? @map("oauth_token")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Message {
+  id             String        @id @default(uuid())
+  conversation   Conversation  @relation(fields: [conversationId], references: [id])
+  conversationId String
+  author         MessageAuthor
+  content        String
+  videoId        String?
+  video          Video?
+  createdAt      DateTime      @default(now())
+}
+
+model Video {
+  id        String      @id @default(uuid())
+  message   Message     @relation(fields: [messageId], references: [id])
+  messageId String      @unique
+  status    VideoStatus @default(PENDING)
+  url       String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }
 
 enum Role {
@@ -26,40 +93,15 @@ enum Role {
   USER
 }
 
-model Account {
-  id                 Int       @id @default(autoincrement())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?   @map("refresh_token")
-  access_token       String?   @map("access_token")
-  expires_at         Int?      @map("expires_at")
-  token_type         String?   @map("token_type")
-  scope              String?
-  id_token           String?   @map("id_token")
-  session_state      String?   @map("session_state")
-  oauth_token_secret String?   @map("oauth_token_secret")
-  oauth_token        String?   @map("oauth_token")
-
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
+enum MessageAuthor {
+  SYSTEM
+  USER
+  ASSISTANT
 }
 
-model Session {
-  id           Int       @id @default(autoincrement())
-  sessionToken String    @unique  @map("session_token")
-  userId       String    @map("user_id")
-  expires      DateTime
-
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model VerificationToken {
-  identifier String
-  token      String    @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
+enum VideoStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }

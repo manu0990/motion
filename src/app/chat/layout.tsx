@@ -2,6 +2,7 @@
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -12,7 +13,8 @@ export function SidebarToggle() {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-
+  const session = useSession();
+  const user = session.data?.user;
   return (
     <SidebarProvider>
       <div className="flex min-h-screen transition ease-in-out overflow-x-hidden">
@@ -23,13 +25,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <SidebarToggle />
               <Link href="/chat" className="text-xl font-medium hover:bg-muted px-2 py-1 rounded-md "><h1>∑otion</h1></Link>
             </span>
-            <Image
-              src="/profile"
-              alt="user-profile"
-              width={32}
-              height={32}
-              className="border border-rose-600 h-8 w-8 rounded-full object-cover"
-            />
+            <Link href="#">
+              <Image
+                src={user?.image || "/default-user.svg"}
+                alt="user-profile"
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            </Link>
           </div>
           {children}
         </main>
