@@ -10,31 +10,34 @@ import { Message } from "@/types/llm-response";
 import axios from "axios"
 
 export function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const params = useParams();
   const convoIdFromUrl = params.conversationId as string;
-  const [conversationId, setConversationId] = useState(convoIdFromUrl || "");
   const pathName = usePathname();
   const session = useSession();
   const router = useRouter();
   const user = session.data?.user;
 
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState(convoIdFromUrl || "");
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // Scrolls the chat to the latest message and focuses the input whenever messages change.
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     inputRef.current?.focus();
   }, [messages]);
 
+  // Updates the internal conversation ID state if the URL parameter changes.
   useEffect(() => {
     if (convoIdFromUrl && convoIdFromUrl !== conversationId) {
       setConversationId(convoIdFromUrl);
     }
   }, [convoIdFromUrl, conversationId]);
 
-
+  // Loads the chat history from the server when the user or conversation ID changes.
   useEffect(() => {
     if (user && conversationId) {
       axios.get(`/api/chat/${conversationId}`)

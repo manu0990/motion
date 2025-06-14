@@ -3,12 +3,9 @@ import prisma from "@/db/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { conversationId: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ conversationId: string }> }) {
   try {
-    const { conversationId } = params;
+    const { conversationId } = await params;
     if (!conversationId) {
       return NextResponse.json({ error: "Conversation ID is required" }, { status: 400 });
     }
