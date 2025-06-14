@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Message } from "@/components/chat/chat-interface";
+import { Message } from "@/types/llm-response";
 
 interface ChatMessageProps {
   message: Message;
@@ -21,7 +21,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
             : "bg-transparent text-secondary-foreground"
         )}
       >
-        <div className="text-sm whitespace-pre-wrap">{message.prompt}</div>
+        <div className="text-sm whitespace-pre-wrap">{message.content}</div>
       </div>
     </div>
   );

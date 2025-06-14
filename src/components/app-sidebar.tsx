@@ -17,7 +17,7 @@ import Link from "next/link"
 const items = [
   {
     title: "New chat",
-    url: "/chat",
+    url: "/new_chat",
     icon: Edit,
   },
   {
