@@ -8,6 +8,8 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { getLLMResponse } from "@/actions/ai/getLLMResponse";
 import { Message } from "@/types/llm-response";
 import axios from "axios"
+import { mutate } from "swr";
+import { LoadingBubble } from "./loading-bubble";
 
 export function ChatInterface() {
   const params = useParams();
@@ -49,7 +51,7 @@ export function ChatInterface() {
         .catch(err => console.error(err));
     }
   }, [conversationId, user]);
-
+  
   if (!user) return;
 
   const handleSendMessage = async (userPrompt: string) => {
@@ -66,8 +68,10 @@ export function ChatInterface() {
     setInputValue("");
     setIsLoading(true);
 
-    const { assistantResponse, conversationId: newConversationId } = await getLLMResponse({ conversationId, userId: user.id, userPrompt });
-
+    const { assistantResponse, conversationId: newConversationId, newTitleGenerated } = await getLLMResponse({ conversationId, userId: user.id, userPrompt });
+    if (newTitleGenerated) {
+      mutate("/api/conversations");
+    }
     setMessages(prev => [...prev, assistantResponse]);
     if (conversationId === "") {
       setConversationId(newConversationId);
@@ -133,6 +137,7 @@ export function ChatInterface() {
               isLoading={isLoading}
             />
           ))}
+          {isLoading  && <LoadingBubble />} 
           <div ref={messagesEndRef} />
         </div>
 
