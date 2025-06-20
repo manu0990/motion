@@ -7,7 +7,7 @@ import Image from "next/image";
 
 export default function SignInPage() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/home";
+  const callbackUrl = searchParams.get("callbackUrl") || "/chat";
   const providerButtonStyle = "w-full rounded space-x-5 h-12 text-md font-sans rounded-full bg-input/20 border-input hover:bg-input/50";
 
   return (

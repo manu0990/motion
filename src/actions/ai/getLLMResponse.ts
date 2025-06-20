@@ -58,7 +58,7 @@ export async function getLLMResponse({ conversationId, userId, userPrompt }: LLM
   ] as OpenAI.ChatCompletionMessageParam[];
 
   const response = await openai.chat.completions.create({
-    model: "gemini-1.5-flash-latest",
+    model: process.env.GENERATIVE_LLM_MODEL || "gemini-1.5-flash-latest",
     messages: messagesForLLM,
   });
   const assistantMessageContent = response.choices[0].message.content ?? "Sorry, I encountered an issue.";

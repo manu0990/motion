@@ -10,6 +10,9 @@ import { Message } from "@/types/llm-response";
 import axios from "axios"
 import { mutate } from "swr";
 import { LoadingBubble } from "./loading-bubble";
+import rejectGenerateVideo from "@/actions/server/handleRejection";
+import { toast } from "sonner";
+import { approveAndGenerateVideo } from "@/actions/server/handleApproval";
 
 export function ChatInterface() {
   const params = useParams();
@@ -22,6 +25,7 @@ export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingId, setIsLoadingId] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState(convoIdFromUrl || "");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -40,7 +44,7 @@ export function ChatInterface() {
   }, [convoIdFromUrl, conversationId]);
 
   // Loads the chat history from the server when the user or conversation ID changes.
-  useEffect(() => {
+  useEffect(() => { 
     if (user && conversationId) {
       axios.get(`/api/chat/${conversationId}`)
         .then(res => {
@@ -51,7 +55,7 @@ export function ChatInterface() {
         .catch(err => console.error(err));
     }
   }, [conversationId, user]);
-  
+
   if (!user) return;
 
   const handleSendMessage = async (userPrompt: string) => {
@@ -82,46 +86,61 @@ export function ChatInterface() {
     setIsLoading(false);
   }
 
-  const handleApproveCode = async (messageId: string) => {
+  const handleApproveCode = async (messageId: string, codeContent: string) => {
+    setIsLoadingId(messageId);
     setIsLoading(true);
+    const quality = "-qm"   // can be "-ql" || "-qm" || "-qh" or other options can handle later if needed
 
-    setMessages(prev =>
-      prev.map(msg =>
-        msg.id === messageId ? { ...msg, isApproved: true } : msg
-      )
-    );
+    try {
+      const res = await approveAndGenerateVideo(messageId, codeContent, quality);
+      if (res.videoUrl) {
+        const videoCompleteMessage: Message = {
+          id: Date.now().toString(),
+          role: "system",
+          content: "Your video has been generated! You can view it below.",
+          timestamp: new Date(),
+          videoUrl: res.videoUrl,
+        };
 
-    // Here I need to send another request to any other server for the video job
-    setTimeout(() => { // <--- remove this
+        setMessages(prev => [...prev, videoCompleteMessage]);
+      }
 
-      const videoCompleteMessage: Message = {
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+      setIsLoadingId(null);
+    }
+  };
+
+  const handleRejectCode = async (id: string) => {
+    setIsLoadingId(id);
+    try {
+      const result = await rejectGenerateVideo(id);
+      if (result.success) {
+        setMessages((msgs) =>
+          msgs.map((m) =>
+            m.id === id ? { ...m, isRejected: true } : m
+          )
+        );
+      } else {
+        toast.error(result.message);
+      }
+      const rejectionMessage: Message = {
         id: Date.now().toString(),
         role: "system",
-        content: "Your video has been generated! You can view it below.",
+        content: "You've rejected the code. Please provide more details about what changes you'd like to make.",
         timestamp: new Date(),
-        videoUrl: "https://res.cloudinary.com/dw118erfr/video/upload/v1740545482/samples/cld-sample-video.mp4",
       };
+      setMessages(prev => [...prev, rejectionMessage]);
 
-      setMessages(prev => [...prev, videoCompleteMessage]);
-      setIsLoading(false);
-
-    }, 15000);        // <--- remove this
-  }
-
-  const handleRejectCode = (messageId: string) => {
-    setMessages(prev =>
-      prev.map(msg =>
-        msg.id === messageId ? { ...msg, isApproved: false } : msg
-      )
-    );
-
-    const rejectionMessage: Message = {
-      id: Date.now().toString(),
-      role: "system",
-      content: "You've rejected the code. Please provide more details about what changes you'd like to make.",
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, rejectionMessage]);
+    } catch (err: unknown) {
+      console.error("Rejection failed:", err);
+      toast.error("Rejection failed, please try again later.");
+    } finally {
+      setIsLoadingId(null);
+    }
   };
 
   return (
@@ -134,13 +153,12 @@ export function ChatInterface() {
               message={message}
               onApprove={handleApproveCode}
               onReject={handleRejectCode}
-              isLoading={isLoading}
+              isLoading={isLoadingId === message.id}
             />
           ))}
-          {isLoading  && <LoadingBubble />} 
+          {isLoading && <LoadingBubble />}
           <div ref={messagesEndRef} />
         </div>
-
         <div className="sticky bottom-0 flex flex-col gap-2 pb-1 bg-background">
           <div className="p-2 bg-accent rounded-[25px]">
             <ChatInput

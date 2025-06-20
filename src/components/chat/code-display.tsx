@@ -28,21 +28,26 @@ export function CodeDisplay({ code, language }: CodeDisplayProps) {
 
   return (
     <div className="relative">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute right-2 top-2 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
-        onClick={handleCopy}
-      >
-        {copied ? (
-          <Check className="h-4 w-4 text-green-500" />
-        ) : (
-          <Copy className="h-4 w-4" />
-        )}
-      </Button>
 
-      <div className="overflow-auto p-4 rounded-md bg-card text-sm">
-        <SyntaxHighlighter language={language} style={funky} customStyle={{ background: "transparent" }}>
+      <div className="absolute px-3 bg-neutral-800 w-full py-1 flex items-center justify-between rounded-md">
+        <span className="text-white/60 text-xs">{language}</span>
+        
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 rounded-full bg-background/80 backdrop-blur-sm text-muted-foreground"
+          onClick={handleCopy}
+        >
+          {copied ? (
+            <Check className="h-4 w-4 text-green-500" />
+          ) : (
+            <Copy className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+
+      <div className="overflow-auto pt-8 rounded-md bg-black text-sm">
+        <SyntaxHighlighter language={language} style={funky}>
           {code}
         </SyntaxHighlighter>
       </div>

@@ -9,7 +9,7 @@ import { parseStringIntoBlocks } from "@/lib/stringParser";
 
 type UnifiedMessageType = {
   message: Message;
-  onApprove: (id: string) => void;
+  onApprove: (id: string, codeContent: string) => void;
   onReject: (id: string) => void;
   isLoading: boolean;
 }
@@ -18,7 +18,7 @@ export function UnifiedMessage({ message, onApprove, onReject, isLoading }: Unif
 
   if (message.role !== "user") {
     const contentBlocks = parseStringIntoBlocks(message.content);
-
+    
     return (
       <div className="my-4">
         {contentBlocks.length > 0 ? (
@@ -33,20 +33,21 @@ export function UnifiedMessage({ message, onApprove, onReject, isLoading }: Unif
                   code={block.content}
                   language={block.language ?? "plaintext"}
                 />
-
-                {message.isApproved && (
+                
+                {!message.isApproved && !message.isRejected && (
                   <div className="mt-2 flex items-center space-x-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => onReject(message.id)}
                       disabled={isLoading}
+                      className="hover:bg-destructive"
                     >
                       <X className="mr-1 h-4 w-4" /> Cancel
                     </Button>
                     <Button
                       size="sm"
-                      onClick={() => onApprove(message.id)}
+                      onClick={() => onApprove(message.id, block.content)}
                       disabled={isLoading}
                     >
                       <Check className="mr-1 h-4 w-4" /> Generate Video
@@ -54,12 +55,12 @@ export function UnifiedMessage({ message, onApprove, onReject, isLoading }: Unif
                   </div>
                 )}
 
-                {message.isApproved === true && (
+                {message.isApproved && !message.isRejected && (
                   <Badge variant="secondary" className="mt-2">
                     <Check className="mr-1 h-4 w-4 text-green-500" /> Approved
                   </Badge>
                 )}
-                {message.isApproved === false && (
+                {!message.isApproved && message.isRejected && (
                   <Badge variant="secondary" className="mt-2">
                     <X className="mr-1 h-4 w-4 text-red-500" /> Cancelled
                   </Badge>
