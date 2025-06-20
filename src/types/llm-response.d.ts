@@ -6,4 +6,5 @@ export type Message = {
   videoUrl?: string;
   timestamp: Date;
   isApproved?: boolean;
+  isRejected?: boolean;
 };

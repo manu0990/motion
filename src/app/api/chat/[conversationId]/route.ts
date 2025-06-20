@@ -30,12 +30,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ conv
       where: { conversationId },
       orderBy: { createdAt: "asc" },
     });
-
     const messagesWithVideoUrl = await Promise.all(
       messages.map(async (msg) => {
         let videoUrl = null;
         if (msg.videoId) {
-          const video = await prisma.video.findFirst({ where: { id: msg.videoId } });
+          const video = await prisma.video.findFirst({ where: { messageId: msg.id } });
+          
           videoUrl = video ? video.url : null;
         }
         return {
@@ -44,6 +44,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ conv
           content: msg.content,
           timestamp: msg.createdAt,
           videoUrl,
+          isApproved: msg.isApproved,
+          isRejected: msg.isRejected,
         };
       })
     );
