@@ -86,33 +86,32 @@ export function ChatInterface() {
     setIsLoading(false);
   }
 
-  const handleApproveCode = async (messageId: string, codeContent: string) => {
-    setIsLoadingId(messageId);
-    setIsLoading(true);
-    const quality = "-qm"   // can be "-ql" || "-qm" || "-qh" or other options can handle later if needed
+const handleApproveCode = async (messageId: string, codeContent: string) => {
+  setIsLoadingId(messageId);
+  setIsLoading(true);
 
-    try {
-      const res = await approveAndGenerateVideo(messageId, codeContent, quality);
-      if (res.videoUrl) {
-        const videoCompleteMessage: Message = {
-          id: Date.now().toString(),
-          role: "system",
-          content: "Your video has been generated! You can view it below.",
-          timestamp: new Date(),
-          videoUrl: res.videoUrl,
-        };
+  try {
+    const quality: "-ql" | "-qm" | "-qh" = "-qm";
+    const res = await approveAndGenerateVideo(messageId, codeContent, quality);
 
-        setMessages(prev => [...prev, videoCompleteMessage]);
-      }
-
-      router.refresh();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-      setIsLoadingId(null);
+    if (res.videoUrl) {
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === messageId
+            ? { ...msg, isApproved: true, isRejected: false, videoUrl: res.videoUrl ?? undefined }
+            : msg
+        )
+      );
     }
-  };
+  } catch (error) {
+    console.error("Approval / video generation failed:", error);
+    toast.error("Failed to generate video. Please try again.");
+  } finally {
+    setIsLoading(false);
+    setIsLoadingId(null);
+  }
+};
+
 
   const handleRejectCode = async (id: string) => {
     setIsLoadingId(id);
@@ -132,6 +131,7 @@ export function ChatInterface() {
         role: "system",
         content: "You've rejected the code. Please provide more details about what changes you'd like to make.",
         timestamp: new Date(),
+        
       };
       setMessages(prev => [...prev, rejectionMessage]);
 
