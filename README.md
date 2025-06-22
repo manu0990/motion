@@ -1,36 +1,135 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Motion
 
-## Getting Started
+**Motion** is a web application that lets you **generate stunning animations just by describing them in natural language**. Powered by [Manim](https://docs.manim.community/) under the hood, Motion translates your prompt into Python animation code, renders it using a backend worker, and delivers a playable video — all in one seamless flow.
 
-First, run the development server:
+Built with **Next.js**, **Express**, and **OpenAI**, Motion is your creative canvas for math, science, and educational visualizations — no coding required.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-black?logo=next.js&logoColor=white" alt="Next.js 14" />
+  <img src="https://img.shields.io/badge/Manim-0.19.0-blue" alt="Manim 0.19.0" />
+  <img src="https://img.shields.io/badge/Express.js-%23404d59.svg?logo=express&logoColor=%2361DAFB" alt="Express.js" />
+  <img src="https://img.shields.io/badge/Google%20Gemini-886FBF?logo=googlegemini&logoColor=fff" alt="Gemini API" />
+  <img src="https://img.shields.io/badge/Prisma-2D3748?logo=prisma&logoColor=white" alt="Prisma" />
+  <img src="https://img.shields.io/badge/Postgres-%23316192.svg?logo=postgresql&logoColor=white" alt="Postgres" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff" alt="TypeScript" />
+</p>
+
+---
+
+## ✨ Features
+
+* 🧠 **Prompt-to-Animation**: Describe your animation and get a rendered video
+* 🎬 **Manim Integration**: Uses Manim to create mathematically accurate visuals
+* ⚡ **Express Worker**: A Python-based worker renders Manim code securely
+* 🔐 **Google OAuth**: Authenticate via your Google account
+* 🌐 **Next.js Frontend**: Smooth UI built with React and deployed via Next.js
+
+---
+
+## 📁 Project Structure
+
+```text
+Motion/
+├── prisma/                    # Prisma schema & migrations
+├── public/                    # Static assets (images, icons, fonts, etc.)
+├── src/                       # Next.js application code
+│   ├── actions/               # Server-action handlers (e.g. approveAndGenerateVideo)
+│   ├── app/                   # Next.js App Router routes & layouts
+│   ├── components/            # Reusable UI components
+│   ├── context/               # React Contexts & Providers
+│   ├── db/                    # Database client initialization
+│   ├── hooks/                 # Custom React hooks
+│   ├── lib/                   # Utility functions & helpers
+│   ├── types/                 # Shared TypeScript types
+│   └── middleware.ts          # Edge/middleware logic
+├── worker/                    # Worker microservice for Manim renders
+├── .env                      # Environment variables for main app
+└── README.md              # You're reading it :)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ⚙️ Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env` file in the root with the following:
 
-## Learn More
+```env
+DATABASE_URL="postgresql_db_connection_string"
 
-To learn more about Next.js, take a look at the following resources:
+# Google OAuth credentials 
+GOOGLE_CLIENT_ID="your google client id"
+GOOGLE_CLIENT_SECRET="your google client secret"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Github OAuth credentials
+GITHUB_ID="your github id"
+GITHUB_SECRET="your github secret"
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+NEXTAUTH_SECRET="mynextappsecret"
+NEXTAUTH_URL="http://localhost:3000"
 
-## Deploy on Vercel
+# llm model related credentials 
+GENERATIVE_LLM_MODEL=""
+GEMINI_API_KEY=""
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# url of your worker
+WORKER_URL="http://localhost:3001"
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+
+---
+
+## 🧱 Tech Stack
+
+* **Frontend**: Next.js 14, React, Tailwind CSS, NextAuth.js, Prisma
+* **Backend Worker**: Express, Manim (Python)
+* **Authentication**: Google OAuth
+* **AI Integration**: OpenAI (GPT for prompt → code generation)
+* **Package Manager**: `pnpm`
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone and install dependencies
+
+```bash
+git clone https://github.com/manu-0990/motion.git
+cd motion
+pnpm install
+```
+
+### 2. Set up the environment
+
+Create a `.env` file at the root using the example above.
+
+### 3. Run the Manim worker
+
+Follow the instruction provided in the folder
+
+### 4. Run the frontend
+
+```bash
+pnpm dev
+```
+
+---
+
+## 🧪 Example Prompt
+
+> "Make a video of sine wave in a 2d plane"
+
+---
+
+## 🛠️ Future Ideas
+
+* Add a code editor
+* User gallery and saved animations
+* More animation styles and themes
+* Real-time preview and scrubber
+
+
+---
+
+## 🧑‍💻 Contributing
+
+Pull requests are welcome! Please open an issue first to discuss what you’d like to change.
