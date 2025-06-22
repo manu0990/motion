@@ -20,7 +20,7 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         if (value.trim()) {
-          onSubmit(value);
+          onSubmit(value.trim());
         }
       }
     };
@@ -57,7 +57,7 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
           size="icon"
           onClick={() => {
             if (value.trim()) {
-              onSubmit(value);
+              onSubmit(value.trim());
             }
           }}
           disabled={isLoading || !value.trim()}
