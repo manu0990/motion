@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 type ReturnType = {
   status: "success" | "error";
   message: string;
-  videoUrl: string | null;
+  videoId: string | null;
 };
 
 const retryAxios = async <T>(fn: () => Promise<T>, retries = 3): Promise<T> => {
@@ -16,11 +16,11 @@ const retryAxios = async <T>(fn: () => Promise<T>, retries = 3): Promise<T> => {
       return await fn();
     } catch (error) {
       if (i === retries - 1) throw error;
-      console.warn(`Retrying video generation attempt ${i + 1}...`);
+      console.warn(`Retrying API call, attempt ${i + 2}/${retries}...`);
       await new Promise((res) => setTimeout(res, 1000 * (i + 1)));
     }
   }
-  throw new Error("retryAxios: All retries failed but no error was thrown.");
+  throw new Error("retryAxios: All retries failed.");
 };
 
 export const approveAndGenerateVideo = async (
@@ -28,11 +28,12 @@ export const approveAndGenerateVideo = async (
   codeContent: string,
   quality: "-qm" | "-qh" = "-qm"
 ): Promise<ReturnType> => {
+
   if (!codeContent.trim()) {
     return {
       status: "error",
       message: "Code content cannot be empty.",
-      videoUrl: null,
+      videoId: null,
     };
   }
 
@@ -42,12 +43,12 @@ export const approveAndGenerateVideo = async (
     return {
       status: "error",
       message: "A server configuration error occurred. Please contact support.",
-      videoUrl: null,
+      videoId: null,
     };
   }
 
   try {
-    const apiUrl = new URL("/generate", baseUrl).toString();
+    const apiUrl = new URL("/api/render", baseUrl).toString();
 
     const response = await retryAxios(() =>
       axios.post(
@@ -57,18 +58,22 @@ export const approveAndGenerateVideo = async (
       )
     );
 
-    const { videoUrl, message: successMessage }: { videoUrl: string; message?: string } = response.data;
+    const { s3Key, message: successMessage }: { s3Key: string; message?: string } = response.data;
 
-    const updatedMessage = await prisma.$transaction(async (tx) => {
+    if (!s3Key) {
+        throw new Error("Worker did not return a valid s3Key.");
+    }
+
+    const transactionResult = await prisma.$transaction(async (tx) => {
       const video = await tx.video.create({
         data: {
           message: { connect: { id: messageId } },
           status: "COMPLETED",
-          url: videoUrl,
+          s3Key: s3Key,
         },
       });
 
-      return await tx.message.update({
+      const updatedMessage = await tx.message.update({
         where: { id: messageId },
         data: {
           isApproved: true,
@@ -80,35 +85,37 @@ export const approveAndGenerateVideo = async (
           },
         },
       });
+
+      return { newVideoId: video.id, conversationId: updatedMessage.conversation?.id };
     });
 
-    const conversationId = updatedMessage.conversation?.id;
-    if (conversationId) {
-      revalidatePath(`/chat/${conversationId}`);
+
+    if (transactionResult.conversationId) {
+      revalidatePath(`/chat/${transactionResult.conversationId}`);
     }
 
     return {
       status: "success",
-      message: successMessage || "Video generated successfully!",
-      videoUrl,
+      message: successMessage || "Video generated and saved successfully!",
+      videoId: transactionResult.newVideoId,
     };
+
   } catch (error) {
     console.error("Error in approveAndGenerateVideo:", error);
 
     if (axios.isAxiosError(error)) {
       console.error("Worker responded with:", error.response?.status, error.response?.data);
-
       return {
         status: "error",
         message: error.response?.data?.message || "The video generation service failed.",
-        videoUrl: null,
+        videoId: null,
       };
     }
 
     return {
       status: "error",
       message: "An unexpected error occurred while saving the video details.",
-      videoUrl: null,
+      videoId: null,
     };
   }
 };
