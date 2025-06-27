@@ -1,0 +1,15 @@
+services:
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+      target: builder
+    container_name: motion-worker-dev
+    env_file:
+      - .env
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./worker:/usr/src/app
+      - /usr/src/app/node_modules
+    command: pnpm dev

@@ -48,3 +48,4 @@ worker/dist
 worker/node_modules
 worker/media
 worker/.env*
+worker/jobs/*

@@ -1,0 +1,26 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose.override.yml
+
+# Dependencies
+node_modules
+
+# Build output
+dist
+*.tsbuildinfo
+
+# Environment
+.env*
+
+# Manim job output directory on host
+worker-jobs/
+
+# IDE / OS specific
+.vscode/
+.idea/
+*.DS_Store
