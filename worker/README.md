@@ -1,120 +1,163 @@
-# Worker Service README
+# Worker Service
 
-This document lives in the `worker/` subdirectory of the **Motion** monorepo. It describes how to set up and run the **Worker Service**, which handles receiving Manim code snippets, rendering animations inside Docker, and uploading the resulting video to Cloudinary.
+This service handles receiving Manim code snippets, rendering them into video animations, and uploading the final result to an AWS S3 bucket. It is designed to run within a Docker container that has Manim and its dependencies pre-installed.
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Express-404d59?logo=express&logoColor=%2361DAFB" alt="Express.js" />
+  <img src="https://img.shields.io/badge/Manim-0.19.0-blue" alt="Manim 0.19.0" />
+  <img src="https://img.shields.io/badge/AWS%20SDK-v3-232F3E?logo=amazonaws&logoColor=white" alt="AWS SDK v3" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white" alt="Docker" />
+</p>
 
 ---
 
 ## 🚀 Quick Start
 
-1. **Clone the Motion repo**
+### Prerequisites
 
-   ```bash
-   cd worker
-   ```
+- Node.js & pnpm
+- Docker
+- Access to an AWS S3 bucket with credentials
 
-2. **Install dependencies**
+### Local Development
 
-   ```bash
-   pnpm install
-   ```
+1.  **Navigate to the worker directory**
+    From the monorepo root:
 
-3. **Configure environment**
-   Copy the example `.env` from the root of the monorepo, or create a new one in `worker/`:
+    ```bash
+    cd worker
+    ```
 
-   ```env
-   # Worker server port (optional; default: 3001)
-   PORT=3001
+2.  **Install dependencies**
 
-   # Docker image tag containing Manim
-   DOCKER_IMAGE=manimcommunity/manim:0.19.0
+    ```bash
+    pnpm install
+    ```
 
-   # Cloudinary credentials for video upload
-   CLOUDINARY_CLOUD_NAME=your_cloud_name
-   CLOUDINARY_API_KEY=your_api_key
-   CLOUDINARY_API_SECRET=your_api_secret
-   ```
+3.  **Configure environment**
+    Create a `.env` file in the `worker/` directory and populate it with your credentials.
 
-4. **Run the development server**
+    ```env
+    # Worker server port (optional; default: 3001)
+    PORT=3001
 
-   ```bash
-   pnpm dev
-   ```
+    # AWS S3 Configuration for video uploads
+    S3_BUCKET_NAME=your-s3-bucket-name
+    AWS_REGION=your-aws-region
+    AWS_ACCESS_KEY_ID=your_access_key_id
+    AWS_SECRET_ACCESS_KEY=your_secret_access_key
 
-5. **Health check**
+    # Optional: For S3-compatible services like MinIO
+    # S3_ENDPOINT=http://localhost:9000
+    ```
 
-   ```bash
-   curl http://localhost:3001/health
-   # → { "message": "Health is OK" }
-   ```
+4.  **Run the development server**
+    This requires having `manim` and its dependencies (like `ffmpeg`, `cairo`) installed on your local machine.
+
+    ```bash
+    pnpm dev
+    ```
+
+5.  **Health check**
+    ```bash
+    curl http://localhost:3001/health
+    # → { "message": "Health is OK" }
+    ```
+
+### Running with Docker
+
+This is the recommended way to run the service as it isolates the Manim environment.
+
+1.  **Build the Docker image**
+    From the `worker/` directory:
+
+    ```bash
+    docker build -t manim-worker .
+    ```
+
+2.  **Run the container**
+    ```bash
+    docker run --rm -p 3001:3001 --env-file .env manim-worker
+    ```
 
 ---
 
 ## 📁 Directory Structure
 
 ```text
-worker/                   # Worker microservice
+worker/
 ├── src/
-│   ├── server.ts             # Express app setup
-│   ├── routes/               # Server routes
-│   └── helpers/              # Helper functions for worker
-├── media/                    # Per-job temporary directories
+│   ├── index.ts          # Entry point, starts the Express server
+│   ├── server.ts         # Express app, routes, and main logic
+│   └── services/
+│       ├── manimService.ts   # Logic for executing Manim CLI
+│       └── uploadService.ts  # Logic for uploading files to S3
+├── jobs/                 # .gitignore'd dir for temporary render files
+├── Dockerfile            # Multi-stage Dockerfile for the service
 ├── package.json
-├── tsconfig.json
-└── .env                     # Worker-specific env vars
+└── tsconfig.json
 ```
 
 ---
 
 ## 🔧 Configuration Variables
 
-| Variable                | Description                        |
-| ----------------------- | ---------------------------------- |
-| `PORT`                  | HTTP server port (default: `3001`) |
-| `DOCKER_IMAGE`          | Manim Docker image tag to use      |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name              |
-| `CLOUDINARY_API_KEY`    | Cloudinary API key                 |
-| `CLOUDINARY_API_SECRET` | Cloudinary API secret              |
-
-> **Tip:** You can keep a single `.env` at the repository root if you prefer, as long as the worker process can read the variables.
+| Variable                | Description                                                          | Required |
+| ----------------------- | -------------------------------------------------------------------- | :------: |
+| `PORT`                  | Port for the Express server to listen on. Defaults to `3001`.        |    No    |
+| `S3_BUCKET_NAME`        | The name of the AWS S3 bucket to upload videos to.                   |   Yes    |
+| `AWS_REGION`            | The AWS region where the S3 bucket is located.                       |   Yes    |
+| `AWS_ACCESS_KEY_ID`     | Your AWS access key ID.                                              |   Yes    |
+| `AWS_SECRET_ACCESS_KEY` | Your AWS secret access key.                                          |   Yes    |
+| `S3_ENDPOINT`           | The endpoint URL for an S3-compatible storage service (e.g., MinIO). |    No    |
 
 ---
 
 ## ⚙️ HTTP Endpoints
 
-### POST `/generate`
+### `POST /api/render`
 
-* **Purpose**: Receive a Manim scene script, render it, and upload the video.
-* **Request Body**:
+Receives a Manim scene script, renders it into a video, and uploads the result to S3.
 
-  ```json
-  {
-    "codeContent": "<Python code for Manim scene>",
-    "quality": "-ql" | "-qm" | "-qh" // optional, defaults to `-qm`
-  }
-  ```
-* **Successful Response (200)**:
+- **Request Body**:
 
   ```json
   {
-    "message": "Video created successfully.",
-    "jobId": "<uuid>",
-    "videoUrl": "https://res.cloudinary.com/.../video.mp4"
+    "codeContent": "from manim import *\n\nclass MyScene(Scene):\n    def construct(self):\n        self.play(Create(Circle()))",
+    "quality": "-ql"
   }
   ```
-* **Error Response (4xx/5xx)**:
+
+  - `codeContent` (string, required): The Python code for the Manim scene.
+  - `quality` (string, optional): The quality flag for the Manim render. Defaults to `-qm`.
+    - Allowed values: `'-ql'`, `'-qm'`, `'-qh'`, `'-qp'`, `'-qk'`.
+
+- **Successful Response (200)**:
 
   ```json
   {
-    "message": "Error message.",
-    "errors": { /* Zod validation errors */ }
+    "message": "Video created and uploaded successfully.",
+    "s3Key": "videos/uuid-goes-here/MyScene.mp4"
   }
   ```
 
-### GET `/health`
+- **Error Response (4xx/5xx)**:
+  ```json
+  {
+    "message": "Error message describing the failure.",
+    "errors": {
+      /* Optional: Zod validation errors if the request is malformed */
+    }
+  }
+  ```
 
-* **Purpose**: Simple health-check ping.
-* **Response**:
+### `GET /health`
 
+A simple health check endpoint.
+
+- **Response (200)**:
   ```json
   { "message": "Health is OK" }
   ```
@@ -123,63 +166,88 @@ worker/                   # Worker microservice
 
 ## 🛠️ Core Modules
 
-### 1. `job-create` Router (`src/routes/job-create.ts`)
+### `manimService` (`src/services/manimService.ts`)
 
-* Validates incoming payloads with [Zod](https://github.com/colinhacks/zod).
-* Creates a unique workspace under `worker/media/<jobId>/`.
-* Writes the script file to `snippets/scene.py`.
-* Calls `executeManim()` to run the Dockerized Manim render.
-* Calls `uploadToBucket()` to push the final `.mp4` to Cloudinary.
-* On failure, logs errors and cleans up the workspace.
+- **Function:** `runManimScript(manimCode: string, options?: { quality?: ManimQuality; timeoutMs?: number })`
+- **Description:**
 
-### 2. `executeManim()` Helper (`src/helpers/generateVideo.ts`)
+  - Writes the provided Python code to a temporary directory
+  - Detects the `Scene` class name via regex
+  - Executes `manim render` inside that directory with the specified quality flag
+  - Locates the output MP4 video file and returns its path
+  - Cleans up the temporary directory on error or after upload
 
-* Builds and runs a Docker command:
+### `uploadService` (`src/services/uploadService.ts`)
 
-  ```bash
-  docker run --rm \
-    -v "<jobDir>:/manim" \
-    -w /manim \
-    $DOCKER_IMAGE \
-    manim render snippets/scene.py <quality>
-  ```
-* Scans `media/` output for the generated `.mp4` file.
-* Throws if rendering fails or no video is found.
+- **Function:** `uploadFileToCloud(localFilePath: string, options: { sceneName: string })`
+- **Description:**
 
-### 3. `uploadToBucket()` Helper (`src/helpers/upload-to-bucket.ts`)
+  - Verifies the local file exists
+  - Generates a sanitized S3 key under `videos/<uuid>/...`
+  - Uploads the MP4 to your S3 bucket using AWS SDK v3
+  - Returns the S3 key and URI
 
-* Configures [Cloudinary](https://cloudinary.com) via environment variables.
-* Validates local file existence.
-* Uploads via `cloudinary.uploader.upload`, returning the secure URL.
-* Throws on failure.
+## 🐳 Docker
+
+### `Dockerfile`
+
+- **Stage 1 (Builder):**
+
+  1. Base `node:20-bookworm`
+  2. Installs Python 3, `ffmpeg`, and Manim dependencies
+  3. Sets up a Python venv and installs `manim==0.19.0`
+  4. Installs Node dependencies and builds the project
+
+- **Stage 2 (Production):**
+
+  1. Base `node:20-bookworm`
+  2. Installs runtime dependencies (`ffmpeg`, Cairo, etc.)
+  3. Copies the Python venv from the builder stage
+  4. Installs production Node dependencies
+  5. Copies compiled JS output and sets `CMD` to start the server
+
+> **Reminder:** To bring up this service alongside others, run `docker-compose up` from the monorepo root.
 
 ---
 
-## 🔄 Integration with Main App
+## 🔄 Integration Example
 
-In the Next.js frontend (e.g. `/src/actions/ai/approveAndGenerateVideo.ts`), use Axios to trigger the worker:
+To trigger a render from another service (e.g., a Next.js backend), make a POST request to the worker's `/api/render` endpoint.
 
 ```ts
-const response = await axios.post(
-  `${process.env.WORKER_URL}/generate`,
-  { codeContent, quality: '-qm' },
-  { headers: { 'Content-Type': 'application/json' } }
-);
-const { videoUrl } = response.data;
-// Save `videoUrl` to your database and update the UI.
+// Example using fetch in another Node.js service
+async function generateVideo(manimCode: string) {
+  try {
+    const response = await fetch(`${process.env.WORKER_URL}/api/render`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        codeContent: manimCode,
+        quality: "-qm", // medium quality
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to render video.");
+    }
+
+    const { s3Key } = await response.json();
+    console.log(`Video uploaded successfully. S3 Key: ${s3Key}`);
+
+    // You can now store this s3Key in your database.
+    return s3Key;
+  } catch (error) {
+    console.error("Error calling worker service:", error);
+  }
+}
 ```
 
 ---
 
-## 🛠️ Future Ideas
+## 💡 Future Ideas
 
-* **Job status polling**: Add a `/status/:jobId` endpoint.
-* **Authentication & Rate Limiting**: Secure the worker.
-* **Caching**: Reuse previously rendered videos for identical inputs.
-* **Queue Management**: The b=jobs need to follow a queue to complete.
-
----
-
-## 📜 License
-
-MIT License © Your Name
+- **Job Queue**: Implement a robust queueing system (e.g., BullMQ, RabbitMQ) to manage concurrent render requests and prevent overloading the server.
+- **Status Polling**: Add a `/api/render/status/:jobId` endpoint to allow clients to check the progress of a render job.
+- **Authentication**: Secure the worker endpoints with API key authentication or another mechanism to prevent unauthorized use.
+- **Result Caching**: Implement a caching layer (e.g., Redis) to return previously rendered videos for identical code and quality inputs, saving computational resources.
