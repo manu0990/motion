@@ -86,7 +86,7 @@ model Video {
   message   Message     @relation(fields: [messageId], references: [id])
   messageId String      @unique
   status    VideoStatus @default(PENDING)
-  url       String?
+  s3Key     String?     
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 }
