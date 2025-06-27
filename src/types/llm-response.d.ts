@@ -3,7 +3,7 @@ export type Message = {
   role: "user" | "assistant" | "system";
   content: string;
   language?: string;
-  videoUrl?: string;
+  videoId?: string | null;
   timestamp: Date;
   isApproved?: boolean;
   isRejected?: boolean;

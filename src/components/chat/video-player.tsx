@@ -6,10 +6,10 @@ import { Slider } from "@/components/ui/slider";
 import { Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Volume1 } from "lucide-react";
 
 interface VideoPlayerProps {
-  url: string;
+  videoId: string;
 }
 
-export function VideoPlayer({ url }: VideoPlayerProps) {
+export function VideoPlayer({ videoId }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -36,6 +36,8 @@ export function VideoPlayer({ url }: VideoPlayerProps) {
       video.removeEventListener("ended", handleEnd);
     };
   }, []);
+
+  const videoSrc = `/api/video/${videoId}`;
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -118,9 +120,12 @@ export function VideoPlayer({ url }: VideoPlayerProps) {
     <div className="relative h-full w-full bg-background">
       <video
         ref={videoRef}
-        src={url}
+        key={videoId}
+        src={videoSrc}
         className="h-full w-full object-contain"
         onClick={togglePlay}
+        controls={false}
+        preload="metadata"
       />
 
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">

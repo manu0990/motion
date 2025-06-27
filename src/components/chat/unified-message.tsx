@@ -50,7 +50,7 @@ export function UnifiedMessage({ message, onApprove, onReject, isLoading }: Unif
                       onClick={() => onApprove(message.id, block.content)}
                       disabled={isLoading}
                     >
-                      <Check className="mr-1 h-4 w-4" /> Generate Video
+                      <Check className="mr-1 h-4 w-4" /> Generate
                     </Button>
                   </div>
                 )}
@@ -73,9 +73,9 @@ export function UnifiedMessage({ message, onApprove, onReject, isLoading }: Unif
           <ChatMessage message={message} />
         )}
 
-        {message.videoUrl && (
+        {message.videoId && (
           <div className="mt-2 w-full max-w-2xl overflow-hidden rounded-md border">
-            <VideoPlayer url={message.videoUrl} />
+            <VideoPlayer videoId={message.videoId} />
           </div>
         )}
       </div>
@@ -85,12 +85,6 @@ export function UnifiedMessage({ message, onApprove, onReject, isLoading }: Unif
   return (
     <div className="my-4">
       <ChatMessage message={message} />
-
-      {message.videoUrl && (
-        <div className="mt-2 w-full max-w-2xl overflow-hidden rounded-md border">
-          <VideoPlayer url={message.videoUrl} />
-        </div>
-      )}
     </div>
   );
 }

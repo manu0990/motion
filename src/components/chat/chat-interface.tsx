@@ -44,11 +44,11 @@ export function ChatInterface() {
   }, [convoIdFromUrl, conversationId]);
 
   // Loads the chat history from the server when the user or conversation ID changes.
-  useEffect(() => { 
+  useEffect(() => {
     if (user && conversationId) {
       axios.get(`/api/chat/${conversationId}`)
         .then(res => {
-          if (res.statusText !== "OK") throw new Error("Failed to load chat history");
+          if (res.status >= 400) throw new Error("Failed to load chat history");
           return res.data;
         })
         .then((data: Message[]) => setMessages(data))
@@ -87,31 +87,32 @@ export function ChatInterface() {
   }
 
 const handleApproveCode = async (messageId: string, codeContent: string) => {
-  setIsLoadingId(messageId);
-  setIsLoading(true);
+    setIsLoadingId(messageId);
+    
+    try {
+      const quality = "-qm";     // <-- Now hardcoding might make a settings in future
+      const res = await approveAndGenerateVideo(messageId, codeContent, quality);
 
-  try {
-    const quality: "-ql" | "-qm" | "-qh" = "-qm";
-    const res = await approveAndGenerateVideo(messageId, codeContent, quality);
-
-    if (res.videoUrl) {
-      setMessages(prev =>
-        prev.map(msg =>
-          msg.id === messageId
-            ? { ...msg, isApproved: true, isRejected: false, videoUrl: res.videoUrl ?? undefined }
-            : msg
-        )
-      );
+      if (res.status === 'success' && res.videoId) {
+        toast.success(res.message);
+        setMessages(prev =>
+          prev.map(msg =>
+            msg.id === messageId
+              ? { ...msg, isApproved: true, isRejected: false, videoId: res.videoId }
+              : msg
+          )
+        );
+      } else {
+        throw new Error(res.message || "Failed to generate video.");
+      }
+    } catch (error: unknown) {
+      console.error("Approval / video generation failed:", error);
+      const errorMessage =  error instanceof Error ? error.message : "Failed to generate video. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoadingId(null);
     }
-  } catch (error) {
-    console.error("Approval / video generation failed:", error);
-    toast.error("Failed to generate video. Please try again.");
-  } finally {
-    setIsLoading(false);
-    setIsLoadingId(null);
-  }
-};
-
+  };
 
   const handleRejectCode = async (id: string) => {
     setIsLoadingId(id);
@@ -131,7 +132,7 @@ const handleApproveCode = async (messageId: string, codeContent: string) => {
         role: "system",
         content: "You've rejected the code. Please provide more details about what changes you'd like to make.",
         timestamp: new Date(),
-        
+
       };
       setMessages(prev => [...prev, rejectionMessage]);
 
