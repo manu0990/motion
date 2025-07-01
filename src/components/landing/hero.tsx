@@ -1,19 +1,7 @@
-//components/landing/hero.tsx
-"use client";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export function Hero() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <section className="relative overflow-hidden flex items-center py-20 sm:py-32 lg:min-h-[calc(100vh-4rem)] ">
