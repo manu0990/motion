@@ -91,7 +91,7 @@ export async function getLLMResponse({ conversationId, userId, userPrompt }: LLM
       : messagesForTitle;
 
     const titleRes = await generateTitle(conversationId, titleContext);
-    newTitleGenerated = !!titleRes?.success;
+    newTitleGenerated = titleRes?.success;
   }
 
   return { assistantResponse, conversationId, newTitleGenerated };

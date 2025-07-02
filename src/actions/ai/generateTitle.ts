@@ -14,21 +14,24 @@ export type MessageType = {
 };
 
 function isTrivialConversation(messages: MessageType[]): boolean {
-  const fullText = messages.map(m => m.content.toLowerCase()).join(" ");
+  const fullUserText = messages
+    .filter(m => m.role === "user")
+    .map(m => m.content.toLowerCase()).join(" ");
+
   const greetings = [
     "hi", "hello", "hey", "how are you",
     "good morning", "good evening", "what's up",
     "sup", "yo", "hello there", "hi there"
   ];
 
-  const isShort = fullText.replace(/\s+/g, "").length < 40;
-  const isMostlyGreeting = greetings.some(greet => fullText.includes(greet));
+  const isShort = fullUserText.replace(/\s+/g, "").length < 40;
+  const isMostlyGreeting = greetings.some(greet => fullUserText.includes(greet));
 
   return isShort && isMostlyGreeting;
 }
 
 export async function generateTitle(conversationId: string, messages: MessageType[]) {
-  if (isTrivialConversation(messages)) return;
+  if (isTrivialConversation(messages)) return {success: true, newTitle: "New chat"};
 
   const examples: MessageType[] = [
     { role: "user", content: "How do I use the `useEffect` hook in React to fetch data from an API and handle loading states?" },
