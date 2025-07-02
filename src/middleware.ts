@@ -4,7 +4,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const sessionToken = request.cookies.get('next-auth.session-token')?.value || request.cookies.get('__Secure-next-auth.session-token')?.value;
 
-  const protectedPaths = ['/api/auth/signout', '/chat', '/chat/:path*'];
+  const protectedPaths = ['/api/auth/signout', '/chat', '/chat/:path*', '/library'];
   const publicPath = ['/', '/auth/signin', '/auth/signup'];
 
   const isprotectedPath = protectedPaths.includes(path);
