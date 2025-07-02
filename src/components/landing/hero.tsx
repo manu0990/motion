@@ -20,7 +20,7 @@ export function Hero() {
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/new_chat">
+            <Link href="/chat">
               <Button size="lg" className="rounded-full px-8">
                 Get Started
               </Button>
