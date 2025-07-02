@@ -1,6 +1,6 @@
 "use client"
 
-import { Edit, Search } from "lucide-react"
+import { Edit, Images, Search } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -28,6 +28,11 @@ const items = [
     title: "Search chats",
     url: "#",
     icon: Search,
+  },
+  {
+    title: "Library",
+    url: "/library",
+    icon: Images,
   },
 ]
 
@@ -58,16 +63,19 @@ export function AppSidebar() {
           </div>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                const isActive = pathName === item.url && item.url !== '/chat';
+                return (
+                  <SidebarMenuItem key={item.title} className={`-mb-1 rounded-lg text-sm leading-3 font-sans hover:bg-sidebar-accent ${isActive ? "bg-sidebar-accent" : ""}`}>
+                    <SidebarMenuButton asChild>
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -81,7 +89,7 @@ export function AppSidebar() {
                 return (
                   <SidebarMenuItem key={c.id} className={`-mb-1 rounded-lg text-sm leading-3 font-sans hover:bg-sidebar-accent ${isActive ? "bg-sidebar-accent" : ""}`}>
                     <Link href={`/chat/${c.id}`} className="truncate block py-3 px-2 ">
-                      {c.title || "Untitled Chat"}
+                      {c.title || "New Chat"}
                     </Link>
                   </SidebarMenuItem>
                 );
