@@ -47,12 +47,12 @@ export function ChatInterface() {
   useEffect(() => {
     if (user && conversationId) {
       axios.get(`/api/chat/${conversationId}`)
-        .then(res => {
-          if (res.status >= 400) throw new Error("Failed to load chat history");
-          return res.data;
-        })
-        .then((data: Message[]) => setMessages(data))
-        .catch(err => console.error(err));
+        .then(res => setMessages(res.data))
+        .catch(err => {
+          console.error(err);
+          toast.error(`Unable to load conversation ${conversationId}`);
+          router.push('/chat');
+        });
     }
   }, [conversationId, user]);
 
@@ -86,9 +86,9 @@ export function ChatInterface() {
     setIsLoading(false);
   }
 
-const handleApproveCode = async (messageId: string, codeContent: string) => {
+  const handleApproveCode = async (messageId: string, codeContent: string) => {
     setIsLoadingId(messageId);
-    
+
     try {
       const quality = "-qm";     // <-- Now hardcoding might make a settings in future
       const res = await approveAndGenerateVideo(messageId, codeContent, quality);
@@ -107,7 +107,7 @@ const handleApproveCode = async (messageId: string, codeContent: string) => {
       }
     } catch (error: unknown) {
       console.error("Approval / video generation failed:", error);
-      const errorMessage =  error instanceof Error ? error.message : "Failed to generate video. Please try again.";
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate video. Please try again.";
       toast.error(errorMessage);
     } finally {
       setIsLoadingId(null);
