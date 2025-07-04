@@ -39,9 +39,20 @@ export function ChatInterface() {
     setInputValue("");
   }, [handleSendMessage]);
 
-  if (!session?.user) return null; 
-  
-  if (isLoading && convoIdFromUrl) {
+  // Early returns after all hooks are called
+  if (!session?.user) return null;
+
+  if (!convoIdFromUrl) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <p className="text-muted-foreground">No conversation selected</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <LoadingBubble />

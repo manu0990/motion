@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import useSWR, { mutate } from 'swr';
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Message } from "@/types/llm-response";
@@ -15,7 +15,6 @@ const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
 export function useConversation(conversationId: string | null) {
   const router = useRouter();
-  const pathName = usePathname();
   const { data: session } = useSession();
   const user = session?.user;
 
@@ -25,8 +24,10 @@ export function useConversation(conversationId: string | null) {
     {
       onError: (err) => {
         console.error(err);
-        toast.error(`Unable to load conversation ${conversationId}`);
-        router.push('/chat');
+        if (conversationId) {
+          toast.error(`Unable to load conversation ${conversationId}`);
+          router.push('/chat');
+        }
       }
     }
   );
@@ -35,7 +36,7 @@ export function useConversation(conversationId: string | null) {
   const [loadingMessageId, setLoadingMessageId] = useState<string | null>(null);
 
   const handleSendMessage = useCallback(async (userPrompt: string) => {
-    if (!userPrompt.trim() || !user) return;
+    if (!userPrompt.trim() || !user || !conversationId) return;
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
@@ -47,26 +48,27 @@ export function useConversation(conversationId: string | null) {
     await mutateMessages(prev => [...(prev || []), userMessage], false);
     setIsSendingMessage(true);
 
-    const { assistantResponse, conversationId: newConversationId, newTitleGenerated } = await getLLMResponse({
-      conversationId: conversationId || "",
-      userId: user.id,
-      userPrompt,
-    });
+    try {
+      const { assistantResponse, newTitleGenerated } = await getLLMResponse({
+        conversationId,
+        userId: user.id,
+        userPrompt,
+      });
 
-    if (newTitleGenerated) {
-      mutate("/api/conversations");
-    }
-
-    await mutateMessages(prev => [...(prev || []), assistantResponse], false);
-
-    if (!conversationId && newConversationId) {
-      if (pathName !== `/chat/${newConversationId}`) {
-        router.push(`/chat/${newConversationId}`);
+      if (newTitleGenerated) {
+        mutate("/api/conversations");
       }
-    }
 
-    setIsSendingMessage(false);
-  }, [user, conversationId, mutateMessages, router, pathName]);
+      await mutateMessages(prev => [...(prev || []), assistantResponse], false);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Failed to send message. Please try again.");
+      // Remove the user message if there was an error
+      await mutateMessages(prev => prev?.slice(0, -1) || [], false);
+    } finally {
+      setIsSendingMessage(false);
+    }
+  }, [user, conversationId, mutateMessages]);
 
   const handleApproveCode = useCallback(async (messageId: string, codeContent: string) => {
     setLoadingMessageId(messageId);
