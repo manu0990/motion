@@ -3,9 +3,8 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
 import Link from "next/link";
+import { ProfileDropdown } from "@/components/profile-dropdown";
 
 export function SidebarToggle() {
   const { open } = useSidebar();
@@ -14,8 +13,6 @@ export function SidebarToggle() {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const session = useSession();
-  const user = session.data?.user;
 
 
   return (
@@ -28,15 +25,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <SidebarToggle />
               <Link href="/chat" className="text-xl font-medium hover:bg-muted px-2 py-1 rounded-md "><h1>∑otion</h1></Link>
             </span>
-            <Link href="#">
-              <Image
-                src={user?.image || "/default-user.svg"}
-                alt="user-profile"
-                width={32}
-                height={32}
-                className="h-8 w-8 rounded-full object-cover"
-              />
-            </Link>
+            <ProfileDropdown />
           </div>
           <Toaster richColors closeButton position="top-center" />
           {children}
