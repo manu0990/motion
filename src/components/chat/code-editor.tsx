@@ -7,6 +7,7 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 interface CodeEditorProps {
   code: string;
   language?: string;
+  isGeneratingVideo?: boolean;
   onGenerate?: () => void;
   onCodeChange?: (newCode: string) => void;
 }
@@ -14,6 +15,7 @@ interface CodeEditorProps {
 export function CodeEditor({
   code,
   language = "python", // lowercase for syntax highlighter
+  isGeneratingVideo,
   onGenerate,
 }: CodeEditorProps) {
   const handleCopy = () => {
@@ -66,10 +68,11 @@ export function CodeEditor({
       {/* Generate Button */}
       <div className="absolute bottom-4 right-4">
         <button
+          disabled={isGeneratingVideo}
           onClick={onGenerate}
           className="px-4 py-2 bg-gmanim-surface-light/60 rounded-md text-white font-inter text-xs font-bold hover:bg-gmanim-surface-light transition-colors"
         >
-          Generate
+          {isGeneratingVideo ? "Generating..." : "Generate"}
         </button>
       </div>
     </div>
