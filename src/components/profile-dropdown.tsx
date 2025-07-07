@@ -2,7 +2,6 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
-import Image from "next/image";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -15,8 +14,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, Palette, Github, FileText, LogOut, Sun, Moon, Monitor, Check, ArrowUpRightFromSquareIcon } from "lucide-react";
-import { Button } from "./ui/button";
+import { Palette, Github, FileText, LogOut, Sun, Moon, Monitor, Check, ArrowUpRightFromSquareIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export function ProfileDropdown() {
@@ -28,7 +26,7 @@ export function ProfileDropdown() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar>
-          <AvatarImage 
+          <AvatarImage
             src={user?.image || "/default-user.svg"}
             alt="user-profile"
             className="object-cover transition-all cursor-pointer"
@@ -84,16 +82,16 @@ export function ProfileDropdown() {
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
-        
+
         <DropdownMenuItem asChild>
-          <Link href="/terms" className="cursor-pointer">
+          <Link href="/policies/" className="cursor-pointer">
             <FileText className="mr-2 h-4 w-4" />
-            <span>Terms & Policies</span>
+            <span>Privacy Policy</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer text-red-600 focus:text-red-600"
-          onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+          onClick={() => signOut({ callbackUrl: "/" })}
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sign out</span>
