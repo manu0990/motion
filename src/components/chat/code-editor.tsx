@@ -99,7 +99,7 @@ export function CodeEditor({
       </div>
 
       {/* Code Content */}
-      <div className="px-6 pb-6 overflow-auto max-h-[400px] w-full">
+      <div className="px-6 pb-6 overflow-auto max-h-[300px] w-full">
         {isEditing ? (
           <textarea
             value={editedCode}

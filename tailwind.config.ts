@@ -9,6 +9,11 @@ export default {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			spartan: ["League Spartan", "sans-serif"],
+  			mono: ["Roboto Mono", "monospace"],
+  			inter: ["Inter", "sans-serif"],
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -59,6 +64,17 @@ export default {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
+  			},
+  			gmanim: {
+  				dark: "hsl(var(--gmanim-dark))",
+  				surface: "hsl(var(--gmanim-surface))",
+  				"surface-dark": "hsl(var(--gmanim-surface-dark))",
+  				"surface-light": "hsl(var(--gmanim-surface-light))",
+  				accent: "hsl(var(--gmanim-accent))",
+  				"text-primary": "hsl(var(--gmanim-text-primary))",
+  				"text-secondary": "hsl(var(--gmanim-text-secondary))",
+  				"code-blue": "hsl(var(--gmanim-code-blue))",
+  				"code-red": "hsl(var(--gmanim-code-red))",
   			}
   		},
   		borderRadius: {

@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&family=Roboto+Mono:wght@100..700&family=Inter:wght@100..900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -57,6 +59,17 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* GManim Dark Theme Colors */
+    --gmanim-dark: 14 7% 9%;
+    --gmanim-surface: 0 0% 14%;
+    --gmanim-surface-dark: 0 0% 11%;
+    --gmanim-surface-light: 0 0% 18%;
+    --gmanim-accent: 0 0% 42%;
+    --gmanim-text-primary: 0 0% 100%;
+    --gmanim-text-secondary: 0 0% 85%;
+    --gmanim-code-blue: 206 70% 49%;
+    --gmanim-code-red: 353 74% 54%;
   }
 }
 
@@ -95,6 +108,17 @@
       --sidebar-accent-foreground: 240 4.8% 95.9%;
       --sidebar-border: 240 3.7% 15.9%;
       --sidebar-ring: 217.2 91.2% 59.8%;
+
+      /* GManim Dark Theme Colors */
+      --gmanim-dark: 14 7% 9%;
+      --gmanim-surface: 0 0% 14%;
+      --gmanim-surface-dark: 0 0% 11%;
+      --gmanim-surface-light: 0 0% 18%;
+      --gmanim-accent: 0 0% 42%;
+      --gmanim-text-primary: 0 0% 100%;
+      --gmanim-text-secondary: 0 0% 85%;
+      --gmanim-code-blue: 206 70% 49%;
+      --gmanim-code-red: 353 74% 54%;
     }
   }
 }
