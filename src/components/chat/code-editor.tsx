@@ -1,7 +1,6 @@
 "use client";
 
-import { Copy, Edit3, Folder, Save, X } from "lucide-react";
-import { useState } from "react";
+import { Copy, Download } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
@@ -16,30 +15,9 @@ export function CodeEditor({
   code,
   language = "python", // lowercase for syntax highlighter
   onGenerate,
-  onCodeChange,
 }: CodeEditorProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedCode, setEditedCode] = useState(code);
-
   const handleCopy = () => {
-    navigator.clipboard.writeText(isEditing ? editedCode : code);
-  };
-
-  const handleEdit = () => {
-    if (isEditing) {
-      // Cancel editing
-      setEditedCode(code);
-      setIsEditing(false);
-    } else {
-      // Start editing
-      setEditedCode(code);
-      setIsEditing(true);
-    }
-  };
-
-  const handleSave = () => {
-    onCodeChange?.(editedCode);
-    setIsEditing(false);
+    navigator.clipboard.writeText(code);
   };
 
   // Custom style to match your dark theme
@@ -67,59 +45,22 @@ export function CodeEditor({
             <Copy className="w-[14px] h-[13px] text-white" />
           </button>
 
-          {isEditing ? (
-            <>
-              <button
-                onClick={handleSave}
-                className="hover:opacity-70 transition-opacity text-green-400"
-                title="Save changes"
-              >
-                <Save className="w-4 h-[13px]" />
-              </button>
-              <button
-                onClick={handleEdit}
-                className="hover:opacity-70 transition-opacity text-red-400"
-                title="Cancel editing"
-              >
-                <X className="w-4 h-[13px]" />
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={handleEdit}
-              className="hover:opacity-70 transition-opacity"
-              title="Edit code"
-            >
-              <Edit3 className="w-4 h-[13px] text-white" />
-            </button>
-          )}
-
-          <Folder className="w-[13px] h-[13px] text-white" />
+          <Download className="w-[13px] h-[13px] text-white" />
         </div>
       </div>
 
       {/* Code Content */}
       <div className="px-6 pb-6 overflow-auto max-h-[300px] w-full">
-        {isEditing ? (
-          <textarea
-            value={editedCode}
-            onChange={(e) => setEditedCode(e.target.value)}
-            className="w-full h-full bg-transparent text-white font-mono text-[10px] leading-relaxed border-none outline-none resize-none placeholder:text-gmanim-text-secondary"
-            placeholder="Enter your code here..."
-            style={{ minHeight: "350px",wordWrap: "break-word", whiteSpace: "pre-wrap" }}
-          />
-        ) : (
-          <SyntaxHighlighter 
-            language={language.toLowerCase()} 
-            style={vscDarkPlus}
-            customStyle={customStyle}
-            showLineNumbers={false}
-            wrapLines={true}
-            wrapLongLines={true}
-          >
-            {code}
-          </SyntaxHighlighter>
-        )}
+        <SyntaxHighlighter 
+          language={language.toLowerCase()} 
+          style={vscDarkPlus}
+          customStyle={customStyle}
+          showLineNumbers={false}
+          wrapLines={true}
+          wrapLongLines={true}
+        >
+          {code}
+        </SyntaxHighlighter>
       </div>
 
       {/* Generate Button */}

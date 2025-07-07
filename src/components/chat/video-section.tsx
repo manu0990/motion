@@ -1,6 +1,7 @@
 "use client";
 
-import { Folder } from "lucide-react";
+import {    X } from "lucide-react";
+import { VideoPlayer } from "./video-player";
 
 interface SimpleVideoDisplayProps {
   videoId?: string;
@@ -8,12 +9,11 @@ interface SimpleVideoDisplayProps {
   onFolderClick?: () => void;
 }
 
-export function SimpleVideoDisplay({ 
+export function VideoSection({ 
   videoId, 
-  isGenerating = false, 
-  onFolderClick 
+  isGenerating = false,  
 }: SimpleVideoDisplayProps) {
-  const videoSrc = videoId ? `/api/video/${videoId}` : null;
+ // const videoSrc = videoId ? `/api/video/${videoId}` : null;
 
   if (isGenerating) {
     return (
@@ -31,37 +31,29 @@ export function SimpleVideoDisplay({
   if (!videoId) {
     return (
       <div className="bg-gmanim-surface-dark rounded-[13px] h-[400px] flex items-center justify-center">
-        <button
-          onClick={onFolderClick}
-          className="flex flex-col items-center gap-3 p-6 hover:bg-gmanim-surface-light/20 rounded-lg transition-colors group"
-        >
-          <Folder className="w-8 h-8 text-gmanim-text-secondary group-hover:text-white transition-colors" />
-          <span className="text-sm text-gmanim-text-secondary group-hover:text-white transition-colors">
-            Click to view results
-          </span>
-        </button>
+          <div className="flex flex-col items-center gap-3 p-6">
+            <X className="w-8 h-8 text-gmanim-text-secondary" />
+            <span className="text-sm text-gmanim-text-secondary">
+              No video generated
+            </span>
+          </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gmanim-surface-dark rounded-[13px] h-[523px] relative overflow-hidden">
-      {/* Small Folder Icon in Top Right */}
-      <button
-        onClick={onFolderClick}
-        className="absolute top-4 right-4 z-10 w-8 h-8 bg-gmanim-accent/80 rounded-full flex items-center justify-center hover:bg-gmanim-accent transition-all"
-      >
-        <Folder className="w-4 h-4 text-white" />
-      </button>
-
+    <div className="bg-gmanim-surface-dark rounded-[13px] h-[400px] relative overflow-hidden">
+    
       {/* Video Display */}
       <div className="w-full h-full flex items-center justify-center p-6">
-        <video
+     {/*   <video
           src={videoSrc}
           controls
           className="max-w-full max-h-full object-contain rounded-[15px]"
           preload="metadata"
-        />
+        /> */}
+
+        <VideoPlayer videoId={videoId} /> 
       </div>
     </div>
   );

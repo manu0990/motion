@@ -3,11 +3,11 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { User, ChevronDown } from "lucide-react";
+import { User, ChevronDown, X } from "lucide-react";
 import Image from "next/image";
 import { EnhancedChatInput } from "@/components/chat/enhanced-chat-input";
 import { CodeEditor } from "@/components/chat/code-editor";
-import { SimpleVideoDisplay } from "@/components/chat/simple-video-display";
+import { VideoSection } from "@/components/chat/video-section";
 import { getLLMResponse } from "@/actions/ai/getLLMResponse";
 import { useConversation } from "@/hooks/use-conversation";
 import { parseStringIntoBlocks } from "@/lib/stringParser";
@@ -17,21 +17,22 @@ type AppState = "landing" | "generating" | "generated" | "results";
 
 export default function Chat() {
   const { data: session } = useSession();
-  const [appState, setAppState] = useState<AppState>("landing");
+  const [appState, setAppState] = useState<AppState>("generating");
   const [inputValue, setInputValue] = useState("");
   const [currentPrompt, setCurrentPrompt] = useState("");
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [currentCode, setCurrentCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const [generatedVideoId, setGeneratedVideoId] = useState<string | null>(null);
 
+  console.log(appState)
   // Use conversation hook only when we have a conversation ID
   const {
     messages,
     handleSendMessage,
     handleApproveCode,
     isSendingMessage,
-    loadingMessageId,
   } = useConversation(currentConversationId);
 
   // Extract code from the latest assistant message
@@ -59,7 +60,7 @@ export default function Chat() {
   }, [messages]);
 
   const handleSubmit = useCallback(async () => {
-    if (!inputValue.trim() || !session?.user || isLoading) return;
+    if (!inputValue.trim() || !session?.user || isLoading || isSendingMessage) return;
 
     const prompt = inputValue.trim();
     setCurrentPrompt(prompt);
@@ -91,10 +92,10 @@ export default function Chat() {
     } finally {
       setIsLoading(false);
     }
-  }, [inputValue, session?.user, isLoading, currentConversationId, handleSendMessage]);
+  }, [inputValue, session?.user, isLoading, isSendingMessage, currentConversationId, handleSendMessage]);
 
   const handleGenerate = useCallback(async () => {
-    if (!currentCode || !messages || messages.length === 0) return;
+    if (!currentCode || !messages || messages.length === 0 || isGeneratingVideo) return;
 
     // Find the latest assistant message with code
     const latestAssistantMessage = messages
@@ -103,17 +104,17 @@ export default function Chat() {
 
     if (latestAssistantMessage && !latestAssistantMessage.isApproved) {
       try {
-        setIsLoading(true);
+        setIsGeneratingVideo(true);
         await handleApproveCode(latestAssistantMessage.id, currentCode);
         toast.success("Video generation started!");
       } catch (error) {
         console.error("Error generating video:", error);
         toast.error("Failed to generate video. Please try again.");
       } finally {
-        setIsLoading(false);
+        setIsGeneratingVideo(false);
       }
     }
-  }, [currentCode, messages, handleApproveCode]);
+  }, [currentCode, messages, handleApproveCode, isGeneratingVideo]);
 
   const handleFolderClick = () => {
     setAppState("results");
@@ -123,6 +124,7 @@ export default function Chat() {
     setAppState("landing");
     setCurrentPrompt("");
     setGeneratedVideoId(null);
+    
   };
 
   if (!session?.user) return null;
@@ -179,75 +181,85 @@ export default function Chat() {
         {(appState === "generating" ||
           appState === "generated" ||
           appState === "results") && (
-          <div className="w-full max-w-7xl">
-            {/* Current Task Display */}
-            <div className="mb-6">
-              <h2 className="text-lg font-inter text-white mb-2">
-                {currentPrompt || "Generate a rotating circle"}
-              </h2>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-white font-spartan text-[15px]">
-                  {appState === "generating" ? "Generating ..." : "Generated"}
-                </span>
-                {appState === "generating" && (
-                  <ChevronDown className="w-6 h-6 text-white animate-bounce" />
+            <div className="w-full max-w-7xl">
+              {/* Current Task Display */}
+              <div className="mb-6">
+                <h2 className="text-lg font-inter text-white mb-2">
+                  {currentPrompt || ""}
+                </h2>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-white font-spartan text-[15px]">
+                    {appState === "generating" ? "Generating ..." : "Generated"}
+                  </span>
+                  {appState === "generating" && (
+                    <ChevronDown className="w-6 h-6 text-white animate-bounce" />
+                  )}
+                </div>
+              </div>
+
+              {/* Main Content Area */}
+              <div className="bg-gmanim-surface-light rounded-[25px] p-3 lg:p-4 mb-8 relative">
+                {(appState === "generating" || appState === "generated") && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* Code Editor */}
+                    <CodeEditor
+                      code={currentCode}
+                      onGenerate={handleGenerate}
+                      onCodeChange={setCurrentCode}
+       /*                isGeneratingVideo={isGeneratingVideo} */
+                    />
+
+                    {/* Video Display */}
+                    <VideoSection
+                      videoId={generatedVideoId || undefined}
+                      isGenerating={isGeneratingVideo}
+                      onFolderClick={handleFolderClick}
+                    />
+                  </div>
+                )}
+
+                {appState === "results" && (
+                  <div className="space-y-6">
+                    {/* Close Button */}
+                    <div className="absolute top-4 right-4 z-10">
+                      <button
+                        onClick={() => setAppState("generated")}
+                        className="w-8 h-8 bg-gmanim-accent rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all"
+                      >
+                        <X className="w-4 h-4 text-white" />
+                      </button>
+                    </div>
+                    {/* Generate Button */}
+                    <div className="flex justify-center">
+                      <button
+                        onClick={handleNewGeneration}
+                        className="px-6 py-3 bg-gmanim-surface-light/60 rounded-md text-white font-inter text-xs font-bold hover:bg-gmanim-surface-light transition-colors"
+                      >
+                        Generate
+                      </button>
+                    </div>
+
+                    {/* Results would go here */}
+                    <div className="text-center text-gmanim-text-secondary">
+                      Results will be displayed here
+                    </div>
+                  </div>
                 )}
               </div>
-            </div>
 
-            {/* Main Content Area */}
-            <div className="bg-gmanim-surface-light rounded-[25px] p-3 lg:p-4 mb-8 relative">
-              {(appState === "generating" || appState === "generated") && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Code Editor */}
-                  <CodeEditor
-                    code={currentCode}
-                    onGenerate={handleGenerate}
-                    onCodeChange={setCurrentCode}
-                  />
-
-                  {/* Video Display */}
-                  <SimpleVideoDisplay
-                    videoId={generatedVideoId || undefined}
-                    isGenerating={appState === "generating" || (loadingMessageId !== null)}
-                    onFolderClick={handleFolderClick}
+              {/* Bottom Chat Input */}
+              <div className="flex justify-center">
+                <div className="w-full max-w-2xl mb-10">
+                  <EnhancedChatInput
+                    value={inputValue}
+                    onChange={setInputValue}
+                    onSubmit={handleSubmit}
+                    isLoading={isLoading || isSendingMessage}
                   />
                 </div>
-              )}
-
-              {appState === "results" && (
-                <div className="space-y-6">
-                  {/* Generate Button */}
-                  <div className="flex justify-center">
-                    <button
-                      onClick={handleNewGeneration}
-                      className="px-6 py-3 bg-gmanim-surface-light/60 rounded-md text-white font-inter text-xs font-bold hover:bg-gmanim-surface-light transition-colors"
-                    >
-                      Generate
-                    </button>
-                  </div>
-
-                  {/* Results would go here */}
-                  <div className="text-center text-gmanim-text-secondary">
-                    Results will be displayed here
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Bottom Chat Input */}
-            <div className="flex justify-center">
-              <div className="w-full max-w-2xl mb-10">
-                <EnhancedChatInput
-                  value={inputValue}
-                  onChange={setInputValue}
-                  onSubmit={handleSubmit}
-                  isLoading={isLoading || isSendingMessage}
-                />
               </div>
             </div>
-          </div>
-        )}
+          )}
       </main>
     </div>
   );
