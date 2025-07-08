@@ -110,33 +110,34 @@ export function NewChatWelcome() {
 
   // Show welcome interface initially
   return (
-    <div className="container mx-auto h-[calc(100vh-3.5rem)] w-full flex flex-col justify-center items-center gap-8">
-      {/* Welcome Section */}
-      <div className="text-center space-y-4 max-w-2xl">
-        <h1 className="text-4xl font-bold text-primary">
-          Welcome to Motion
-        </h1>
-      </div>
+    <div className="container mx-auto py-3 h-[calc(100vh-3.5rem)] w-full flex flex-col lg:justify-center justify-between items-center gap-8">
+      <div className="h-0 w-full lg:hidden" />
 
-      {/* Example Prompts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl w-full">
-        {examplePrompts.map((example, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              setInputValue(example.prompt);
-              inputRef.current?.focus();
-            }}
-            className="p-4 text-left border rounded-lg hover:bg-accent transition-colors"
-            disabled={isLoading}
-          >
-            <h3 className="font-semibold text-sm mb-2">{example.title}</h3>
-            <p className="text-xs text-muted-foreground">{example.prompt}</p>
-          </button>
-        ))}
-      </div>
+      <main className="flex flex-col justify-center items-center gap-8">
+        <div className="text-center space-y-4 max-w-2xl">
+          <h1 className="text-4xl font-bold text-primary">
+            Welcome to Motion
+          </h1>
+        </div>
 
-      {/* Chat Input */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl w-full">
+          {examplePrompts.map((example, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setInputValue(example.prompt);
+                inputRef.current?.focus();
+              }}
+              className="p-4 text-left border rounded-lg hover:bg-accent transition-colors"
+              disabled={isLoading}
+            >
+              <h3 className="font-semibold text-sm mb-2">{example.title}</h3>
+              <p className="text-xs text-muted-foreground">{example.prompt}</p>
+            </button>
+          ))}
+        </div>
+      </main>
+
       <div className="w-full">
         <div className="p-2 bg-accent rounded-[25px]">
           <ChatInput

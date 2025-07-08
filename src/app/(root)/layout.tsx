@@ -20,9 +20,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <div className="flex min-h-screen transition ease-in-out overflow-x-hidden">
         <AppSidebar />
         <main className="flex-grow">
-          <div className="border-b px-6 py-2 sticky top-0 right-0  h-14 flex items-center justify-between ">
-            <span className="flex items-center gap-4">
-              <SidebarToggle />
+          <div className="border-b px-2 md:px-6 py-2 sticky top-0 right-0  h-14 flex items-center justify-between ">
+            <span className="flex items-center md:gap-4">
+              <span className="hidden md:block"><SidebarToggle /></span>
+              <SidebarTrigger className="md:hidden" />
               <Link href="/chat" className="text-xl font-medium hover:bg-muted px-2 py-1 rounded-md "><h1>∑otion</h1></Link>
             </span>
             <ProfileDropdown />
