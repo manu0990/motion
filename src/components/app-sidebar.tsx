@@ -1,6 +1,6 @@
 "use client"
 
-import { Edit, Images, Search } from "lucide-react"
+import { Edit, Images, Search } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -11,11 +11,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
-import Image from "next/image"
-import Link from "next/link"
+} from "@/components/ui/sidebar";
+import { SearchDialog } from "@/components/search-dialog";
+import Image from "next/image";
+import Link from "next/link";
 import useSWR from "swr";
-import { usePathname } from "next/navigation"
+import { usePathname } from "next/navigation";
 
 // Menu items.
 const items = [
@@ -34,12 +35,12 @@ const items = [
     url: "/library",
     icon: Images,
   },
-]
+];
 
 type ConversationType = {
   id: string;
   title: string;
-}
+};
 
 const fetcher = (url: string) =>
   fetch(url).then((res) => {
@@ -64,7 +65,16 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
-                const isActive = pathName === item.url && item.url !== '/chat';
+                const isActive = pathName === item.url && item.url !== "/chat";
+
+                if (item.title === "Search chats") {
+                  return (
+                    <SidebarMenuItem key={item.title} className={`-mb-1 rounded-lg text-sm leading-3 font-sans hover:bg-sidebar-accent ${isActive ? "bg-sidebar-accent" : ""}`}>
+                      <SearchDialog conversations={conversations} />
+                    </SidebarMenuItem>
+                  );
+                }
+
                 return (
                   <SidebarMenuItem key={item.title} className={`-mb-1 rounded-lg text-sm leading-3 font-sans hover:bg-sidebar-accent ${isActive ? "bg-sidebar-accent" : ""}`}>
                     <SidebarMenuButton asChild>
@@ -99,5 +109,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }
