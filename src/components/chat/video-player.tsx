@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Volume1 } from "lucide-react";
+import { Play, Pause, Maximize, SkipBack, SkipForward, Download } from "lucide-react";
+import Link from "next/link";
 
 interface VideoPlayerProps {
   videoId: string;
@@ -11,11 +12,8 @@ interface VideoPlayerProps {
 
 export function VideoPlayer({ videoId }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -49,32 +47,6 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
       video.play();
     }
     setIsPlaying(!isPlaying);
-  };
-
-  const toggleMute = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const newMutedState = !isMuted;
-    video.muted = newMutedState;
-    setIsMuted(newMutedState);
-  };
-
-  const handleVolumeChange = (newVolume: number[]) => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const volumeValue = newVolume[0];
-    video.volume = volumeValue;
-    setVolume(volumeValue);
-
-    if (volumeValue === 0) {
-      setIsMuted(true);
-      video.muted = true;
-    } else if (isMuted) {
-      setIsMuted(false);
-      video.muted = false;
-    }
   };
 
   const handleTimeChange = (newTime: number[]) => {
@@ -126,6 +98,7 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
         onClick={togglePlay}
         controls={false}
         preload="metadata"
+        controlsList="nodownload"
       />
 
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
@@ -141,17 +114,17 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="icon" onClick={skipBackward}>
-              <SkipBack className="h-4 w-4" />
+              <SkipBack className="h-4 w-4 text-white" />
             </Button>
             <Button variant="ghost" size="icon" onClick={togglePlay}>
               {isPlaying ? (
-                <Pause className="h-5 w-5" />
+                <Pause className="h-5 w-5 text-white" />
               ) : (
-                <Play className="h-5 w-5" />
+                <Play className="h-5 w-5 text-white" />
               )}
             </Button>
             <Button variant="ghost" size="icon" onClick={skipForward}>
-              <SkipForward className="h-4 w-4" />
+              <SkipForward className="h-4 w-4 text-white" />
             </Button>
             <span className="text-xs text-white">
               {formatTime(currentTime)} / {formatTime(duration)}
@@ -160,43 +133,15 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
 
           <div className="flex items-center space-x-2">
             <div className="relative">
-              <Button
-                variant="link"
-                size="icon"
-                onClick={toggleMute}
-                onMouseEnter={() => setShowVolumeSlider(true)}
-                onMouseLeave={() => setShowVolumeSlider(false)}
-              >
-                {isMuted || volume === 0 ? (
-                  <VolumeX className="h-4 w-4" />
-                ) : volume <= 0.5 ? (
-                  <Volume1 className="h-4 w-4" />
-                ) : (
-                  <Volume2 className="h-4 w-4" />
-                )}
-              </Button>
-
-              {showVolumeSlider && (
-                <div
-                  className="absolute bottom-full left-1/2 -translate-x-1/2 transform px-4 py-2 rounded"
-                  onMouseEnter={() => setShowVolumeSlider(true)}
-                  onMouseLeave={() => setShowVolumeSlider(false)}
-                >
-                  <Slider
-                    orientation="vertical"
-                    value={[isMuted ? 0 : volume]}
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    onValueChange={handleVolumeChange}
-                    className="h-24 w-4 mx-auto bg-muted rounded-[20px] [&>div]:left-1/2 [&>div]:-translate-x-1/2 transition-all duration-150 ease-in-out"
-                  />
-                </div>
-              )}
+              <Link href={`/api/download/${videoId}`} target="_blank" download>
+                <Button variant="link" size="icon">
+                  <Download className="h-4 w-4 text-white" />
+                </Button>
+              </Link>
             </div>
 
             <Button variant="ghost" size="icon" onClick={handleFullscreen}>
-              <Maximize className="h-4 w-4" />
+              <Maximize className="h-4 w-4 text-white" />
             </Button>
           </div>
         </div>
