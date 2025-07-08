@@ -2,6 +2,7 @@
 
 import { VideoPlayer } from '@/components/chat/video-player';
 import { useSidebar } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -54,7 +55,10 @@ export default function Library() {
         )}
 
         {!isLoading && videos.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className={cn(
+            "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6",
+            open ? "md:grid-cols-1 xl:grid-cols-3" : ""
+          )}>
             {videos.map((video) => (
               <div key={video.id} className="rounded-xl overflow-hidden shadow-lg bg-neutral-800/50 aspect-video border border-neutral-700">
                 <VideoPlayer videoId={video.id} />
