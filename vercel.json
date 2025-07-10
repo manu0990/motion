@@ -7,6 +7,9 @@
       "maxDuration": 30
     }
   },
+  "env": {
+    "SKIP_ENV_VALIDATION": "1"
+  },
   "git": {
     "deploymentEnabled": {
       "main": true
