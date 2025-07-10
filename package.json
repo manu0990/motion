@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
+    "dev": "prisma generate && next dev --turbopack",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db:gen": "prisma generate",
@@ -46,6 +46,7 @@
     "swr": "^2.3.3",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
+    "vercel": "^44.3.0",
     "zod": "^3.25.67"
   },
   "devDependencies": {
