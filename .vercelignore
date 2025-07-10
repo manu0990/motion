@@ -1,0 +1,25 @@
+# Ignore worker directory - it's a separate service
+worker/
+
+# Ignore Docker files
+docker-compose.yml
+docker-compose.dev.yml
+Dockerfile*
+
+# Ignore development files
+.env.local
+.env.development
+.env.test
+
+# Ignore build artifacts
+.next/
+dist/
+build/
+
+# Ignore logs
+*.log
+logs/
+
+# Ignore temporary files
+.tmp/
+temp/
