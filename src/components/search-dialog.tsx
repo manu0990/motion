@@ -69,8 +69,8 @@ export function SearchDialog({ conversations }: SearchDialogProps) {
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <SidebarMenuButton className="justify-between">
-          <div className="flex items-center gap-2">
-            <Search />
+          <div className="flex items-center gap-1.5 text-sm -ml-0.5">
+            <Search className="h-5 w-5"/>
             <span>Search chats</span>
           </div>
           <span className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
@@ -79,11 +79,11 @@ export function SearchDialog({ conversations }: SearchDialogProps) {
           </span>
         </SidebarMenuButton>
       </SheetTrigger>
-      <SheetContent side="top" className="h-[70vh] max-h-[500px] mx-auto max-w-2xl mt-20 rounded-lg border shadow-lg">
+      <SheetContent side="top" className="h-[70vh] max-h-[500px] mx-auto max-w-96 md:max-w-2xl mt-20 rounded-lg border shadow-lg">
         <SheetHeader className="sr-only">
           <SheetTitle>Search chats</SheetTitle>
         </SheetHeader>
-        <div className="space-y-4">
+        <div className="space-y-4 pt-5">
           <div className="relative">
             <Input
               placeholder="Search chats..."
@@ -98,7 +98,7 @@ export function SearchDialog({ conversations }: SearchDialogProps) {
                 onClick={() => setSearchQuery("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full"
               >
-                <X className="h-4 w-4" />
+                <X id="xxx" className="h-4 w-4" />
               </button>
             )}
           </div>
