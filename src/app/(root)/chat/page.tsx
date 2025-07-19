@@ -8,7 +8,7 @@ export default function Chat() {
 
   return (
     <div className={`overflow-y-auto h-[calc(100vh-3.5rem)] ${open ? "md:w-[calc(100vw-var(--sidebar-width,250px))]" : "w-screen"} transition ease-in-out`}>
-      <div className="h-full w-full px-4 lg:w-1/2 mx-auto">
+      <div className="h-full w-full px-2 lg:max-w-4xl mx-auto">
         <NewChatWelcome />
       </div>
     </div>

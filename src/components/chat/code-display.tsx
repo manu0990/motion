@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { funky } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useTheme } from "next-themes";
+import { a11yDark, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface CodeDisplayProps {
   code: string;
@@ -13,6 +14,7 @@ interface CodeDisplayProps {
 
 export function CodeDisplay({ code, language }: CodeDisplayProps) {
   const [copied, setCopied] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (copied) {
@@ -26,12 +28,13 @@ export function CodeDisplay({ code, language }: CodeDisplayProps) {
     setCopied(true);
   };
 
-  return (
-    <div className="relative">
 
-      <div className="absolute px-3 bg-neutral-800 w-full py-1 flex items-center justify-between rounded-md">
-        <span className="text-white/60 text-xs">{language}</span>
-        
+  const syntaxTheme = theme === 'dark' ? a11yDark : prism;
+
+  return (
+    <div className="relative w-full">
+      <div className="absolute px-2 bg-accent w-full py-1 flex items-center justify-between rounded-t-md">
+        <span className="text-primary text-xs">{language}</span>
         <Button
           variant="ghost"
           size="icon"
@@ -46,8 +49,8 @@ export function CodeDisplay({ code, language }: CodeDisplayProps) {
         </Button>
       </div>
 
-      <div className="overflow-auto pt-8 rounded-md bg-black text-sm">
-        <SyntaxHighlighter language={language} style={funky}>
+      <div className="overflow-auto pt-6 md:w-full w-96 rounded-md bg-background mx-auto text-sm">
+        <SyntaxHighlighter language={language} style={syntaxTheme}>
           {code}
         </SyntaxHighlighter>
       </div>
