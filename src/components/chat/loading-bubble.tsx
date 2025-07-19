@@ -19,15 +19,22 @@ export const SparklesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => 
 
 export function LoadingBubble() {
   return (
-    <div className="flex items-center w-1/3 p-3 bg-accent rounded-xl shadow-lg">
-      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-primary">
-        <SparklesIcon className="h-5 w-5 animate-spin-slow" />
+    <div className="flex flex-col gap-3 max-w-96 md:max-w-full p-3 bg-card/95 backdrop-blur-sm rounded-2xl shadow-xl border border-border/60 transition-all duration-300 hover:shadow-2xl">
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-6 h-6 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-md ring-2 ring-primary/20">
+            <SparklesIcon className="h-4 w-4 text-primary-foreground drop-shadow-sm" />
+          </div>
+          <span className="text-foreground/90 font-semibold text-sm md:text-base tracking-tight">Motion</span>
+        </div>
+        <div className="ml-auto w-2.5 md:w-3 h-2.5 md:h-3 bg-primary rounded-full animate-pulse shadow-sm ring-2 ring-primary/30"></div>
       </div>
-      <span className="text-primary">Thinking</span>
-      <div className="flex items-end space-x-2 ml-2">
-        <span className="block h-1.5 w-1.5 animate-bounce rounded-full bg-primary opacity-90 [animation-delay:0s]" />
-        <span className="block h-1.5 w-1.5 animate-bounce rounded-full bg-primary opacity-90 [animation-delay:0.2s]" />
-        <span className="block h-1.5 w-1.5 animate-bounce rounded-full bg-primary opacity-90 [animation-delay:0.4s]" />
+
+      <div className="flex flex-col gap-2">
+        <div className="h-2 md:h-3 bg-gradient-to-r from-muted via-muted/70 to-muted rounded-full animate-pulse shadow-sm"></div>
+        <div className="h-2 md:h-3 bg-gradient-to-r from-muted via-muted/70 to-muted rounded-full animate-pulse hidden md:block shadow-sm" style={{ animationDelay: '0.15s' }}></div>
+        <div className="h-2 md:h-3 bg-gradient-to-r from-muted via-muted/70 to-muted rounded-full animate-pulse w-11/12 shadow-sm" style={{ animationDelay: '0.3s' }}></div>
+        <div className="h-2 md:h-3 bg-gradient-to-r from-muted via-muted/70 to-muted rounded-full animate-pulse w-4/5 shadow-sm" style={{ animationDelay: '0.45s' }}></div>
       </div>
     </div>
   );
