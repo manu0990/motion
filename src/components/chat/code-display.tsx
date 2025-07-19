@@ -32,8 +32,8 @@ export function CodeDisplay({ code, language }: CodeDisplayProps) {
   const syntaxTheme = theme === 'dark' ? a11yDark : prism;
 
   return (
-    <div className="relative">
-      <div className="absolute px-3 bg-accent w-full py-1 flex items-center justify-between rounded-t-md">
+    <div className="relative w-full">
+      <div className="absolute px-2 bg-accent w-full py-1 flex items-center justify-between rounded-t-md">
         <span className="text-primary text-xs">{language}</span>
         <Button
           variant="ghost"

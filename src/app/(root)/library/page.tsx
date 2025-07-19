@@ -36,19 +36,19 @@ export default function Library() {
   }, []);
 
   return (
-    <div className={`overflow-y-auto h-[calc(100vh-3.5rem)] ${open ? "w-[calc(100vw-var(--sidebar-width,250px))]" : "w-screen"} transition ease-in-out`}>
-      <div className="p-4 md:p-8">
-        <h1 className="text-3xl font-bold mb-6 text-white">Your Video Gallery</h1>
+    <div className={`overflow-y-auto h-[calc(100vh-3.5rem)] ${open ? "md:w-[calc(100vw-var(--sidebar-width,250px))]" : "w-screen"} transition ease-in-out`}>
+      <div className="p-2 md:p-8 flex flex-col justify-center items-center">
+        <h1 className="text-3xl font-bold mb-6 text-primary text-center">Your Video Gallery</h1>
 
         {isLoading && (
-          <div className="flex justify-center items-center h-64 text-white">
+          <div className="flex justify-center items-center h-64 text-primary">
             <Loader2 className="h-8 w-8 animate-spin" />
             <span className="ml-4 text-lg">Loading your creations...</span>
           </div>
         )}
 
         {!isLoading && videos.length === 0 && (
-          <div className="text-center text-gray-400 py-10">
+          <div className="text-center text-primary/50 py-10">
             <h2 className="text-xl font-semibold">No Videos Found</h2>
             <p className="mt-2">Generate some videos in a conversation to see them appear here.</p>
           </div>
