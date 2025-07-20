@@ -4,36 +4,19 @@ import { VideoPlayer } from '@/components/chat/video-player';
 import { useSidebar } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import useSWR from 'swr';
+import axios from 'axios';
 
 interface VideoData {
   id: string;
 }
 
+const fetchVideos = (url: string) => axios.get(url).then(res => res.data as VideoData[]);
+
 export default function Library() {
   const { open } = useSidebar();
-  const [isLoading, setIsLoading] = useState(false);
-  const [videos, setVideos] = useState<VideoData[]>([]);
 
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch('/api/library');
-        if (!response.ok) {
-          throw new Error('Failed to fetch videos.');
-        }
-        const data = await response.json();
-        setVideos(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchVideos();
-  }, []);
+  const { data: videos, isLoading, error } = useSWR('/api/library', fetchVideos);
 
   return (
     <div className={`overflow-y-auto h-[calc(100vh-3.5rem)] ${open ? "md:w-[calc(100vw-var(--sidebar-width,250px))]" : "w-screen"} transition ease-in-out`}>
@@ -47,14 +30,20 @@ export default function Library() {
           </div>
         )}
 
-        {!isLoading && videos.length === 0 && (
+        {!isLoading && (error || !videos?.length) && (
           <div className="text-center text-primary/50 py-10">
-            <h2 className="text-xl font-semibold">No Videos Found</h2>
-            <p className="mt-2">Generate some videos in a conversation to see them appear here.</p>
+            <h2 className="text-xl font-semibold">
+              {error ? "Error loading videos" : "No Videos Found"}
+            </h2>
+            <p className="mt-2">
+              {error
+                ? "Something went wrong while fetching your videos."
+                : "Generate some videos in a conversation to see them appear here."}
+            </p>
           </div>
         )}
 
-        {!isLoading && videos.length > 0 && (
+        {!isLoading && videos && videos.length > 0 && (
           <div className={cn(
             "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6",
             open ? "md:grid-cols-1 xl:grid-cols-3" : ""

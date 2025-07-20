@@ -63,7 +63,6 @@ export function useConversation(conversationId: string | null) {
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to send message. Please try again.");
-      // Remove the user message if there was an error
       await mutateMessages(prev => prev?.slice(0, -1) || [], false);
     } finally {
       setIsSendingMessage(false);
@@ -84,6 +83,8 @@ export function useConversation(conversationId: string | null) {
               ? { ...msg, isApproved: true, isRejected: false, videoId: res.videoId }
               : msg
           ), false);
+
+        mutate('/api/library');
       } else {
         throw new Error(res.message || "Failed to generate video.");
       }
