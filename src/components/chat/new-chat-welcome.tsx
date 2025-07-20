@@ -107,7 +107,7 @@ export function NewChatWelcome() {
       <main className="flex flex-col justify-center items-center gap-8">
         <div className="text-center space-y-4 max-w-2xl">
           <h1 className="text-3xl font-semibold tracking-tight text-primary">
-            Let's bring math to motion!
+            Let&apos;s bring math to motion!
           </h1>
         </div>
 
