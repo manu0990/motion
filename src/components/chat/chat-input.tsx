@@ -47,13 +47,13 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
           onChange={handleInput}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          rows={1}
-          className="pr-14 resize-none border-none bg-transparent text-sm leading-5 focus-visible:outline-none focus-visible:ring-0"
+          rows={3}
+          className="pr-14 resize-none border-none bg-transparent text-sm leading-5 focus-visible:outline-none focus-visible:ring-0 shadow-none placeholder:text-base"
           disabled={isLoading}
           style={{ maxHeight: "160px", overflowY: "auto" }}
         />
         <Button
-          className="absolute bottom-1.5 right-1.5 rounded-full"
+          className="absolute bottom-1.5 right-1.5 rounded-full px-1"
           size="icon"
           onClick={() => {
             if (value.trim()) {
