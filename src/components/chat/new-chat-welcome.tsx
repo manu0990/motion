@@ -40,8 +40,6 @@ export function NewChatWelcome() {
 
   const handleSubmit = useCallback(async (prompt: string) => {
     if (!prompt.trim() || !session?.user || isLoading) return;
-
-    // Immediately show the user message and hide welcome content
     setUserMessage(prompt);
     setShowWelcome(false);
     setInputValue("");
@@ -53,13 +51,10 @@ export function NewChatWelcome() {
         userId: session.user.id,
         userPrompt: prompt,
       });
-
-      // Navigate to the new conversation
       router.push(`/chat/${conversationId}`);
     } catch (error) {
       console.error("Error creating conversation:", error);
       toast.error("Failed to start conversation. Please try again.");
-      // Reset state on error
       setUserMessage(null);
       setShowWelcome(true);
       setInputValue(prompt);
@@ -67,7 +62,6 @@ export function NewChatWelcome() {
     }
   }, [session?.user, router, isLoading]);
 
-  // Auto-scroll to bottom when message is added
   useEffect(() => {
     if (userMessage) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -76,7 +70,6 @@ export function NewChatWelcome() {
 
   if (!session?.user) return null;
 
-  // Show chat interface after user sends a message
   if (!showWelcome && userMessage) {
     return (
       <div className="container mx-auto h-[calc(100vh-3.5rem)] w-full flex flex-col justify-between gap-1 pb-1">
@@ -87,7 +80,6 @@ export function NewChatWelcome() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Chat Input at Bottom */}
           <div className="sticky bottom-0 flex flex-col gap-2 p-2 bg-background">
             <div className="p-2 bg-accent rounded-[25px]">
               <ChatInput
@@ -108,15 +100,14 @@ export function NewChatWelcome() {
     );
   }
 
-  // Show welcome interface initially
   return (
     <div className="container mx-auto py-3 h-[calc(100vh-3.5rem)] w-full flex flex-col lg:justify-center justify-between items-center gap-8">
       <div className="h-0 w-full lg:hidden" />
 
       <main className="flex flex-col justify-center items-center gap-8">
         <div className="text-center space-y-4 max-w-2xl">
-          <h1 className="text-4xl font-bold text-primary">
-            Welcome to Motion
+          <h1 className="text-3xl font-semibold tracking-tight text-primary">
+            Let&apos;s bring math to motion!
           </h1>
         </div>
 

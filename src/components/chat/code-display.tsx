@@ -14,7 +14,12 @@ interface CodeDisplayProps {
 
 export function CodeDisplay({ code, language }: CodeDisplayProps) {
   const [copied, setCopied] = useState(false);
-  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (copied) {
@@ -28,8 +33,10 @@ export function CodeDisplay({ code, language }: CodeDisplayProps) {
     setCopied(true);
   };
 
-
-  const syntaxTheme = theme === 'dark' ? a11yDark : prism;
+  // Use resolvedTheme to get the actual theme (handles 'system' theme properly)
+  // Fall back to 'light' if resolvedTheme is undefined during hydration or not mounted
+  const isDark = mounted && resolvedTheme === 'dark';
+  const syntaxTheme = isDark ? a11yDark : prism;
 
   return (
     <div className="relative w-full">

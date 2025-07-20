@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sid
 import { Toaster } from "@/components/ui/sonner";
 import Link from "next/link";
 import { ProfileDropdown } from "@/components/profile-dropdown";
+import Image from "next/image";
 
 export function SidebarToggle() {
   const { open } = useSidebar();
@@ -24,7 +25,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <span className="flex items-center md:gap-4">
               <span className="hidden md:block"><SidebarToggle /></span>
               <SidebarTrigger className="md:hidden" />
-              <Link href="/chat" className="text-xl font-medium hover:bg-muted px-2 py-1 rounded-md "><h1>∑otion</h1></Link>
+              <Link href="/chat" className="text-xl font-medium hover:bg-muted px-2 py-1 rounded-md ">
+                <Image src='/motion-logo.svg' width={50} height={50} alt="Motion-logo" className="md:hidden h-6 w-6 text-primary dark:invert-0 invert" />
+                <span className="hidden md:block text-xl font-bold">∑otion</span>
+              </Link>
             </span>
             <ProfileDropdown />
           </div>
