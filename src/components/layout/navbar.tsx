@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 export function Navbar() {
+  const { setTheme, theme } = useTheme();
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
@@ -17,13 +20,20 @@ export function Navbar() {
         </div>
 
         <div className="hidden md:flex md:items-center md:space-x-6">
-          <Link href="/#features" className="text-sm font-medium hover:text-primary">
-            Features
-          </Link>
-          <Link href="/#faq" className="text-sm font-medium hover:text-primary">
-            FAQ
-          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative rounded-full"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            <Sun className="h-6 w-6 rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
           <Link href="/auth/signin">
+            <Button variant="default" className="rounded-full">Log in</Button>
+          </Link>
+          <Link href="/auth/signup">
             <Button variant="outline" className="rounded-full" >Sign up for free</Button>
           </Link>
         </div>
