@@ -51,7 +51,7 @@ export default function SignUpPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: Object.fromEntries(fields.map(f => [f.name, ""])) as any,
+    defaultValues: Object.fromEntries(fields.map(f => [f.name, ""])),
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
