@@ -25,14 +25,14 @@ export function ProfileDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar>
+        <Avatar className="cursor-pointer">
           <AvatarImage
-            src={user?.image || "/default-user.svg"}
+            src={user?.image}
             alt="user-profile"
             className="object-cover transition-all cursor-pointer"
           />
-          <AvatarFallback>
-            {user?.name?.[0] || "U"}
+          <AvatarFallback className="cursor-pointer bg-teal-600">
+            {user?.name?.[0].toUpperCase() || "U"}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
