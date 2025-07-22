@@ -35,7 +35,7 @@ export function useConversation(conversationId: string | null) {
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [loadingMessageId, setLoadingMessageId] = useState<string | null>(null);
 
-  const handleSendMessage = useCallback(async (userPrompt: string) => {
+  const handleSendMessage = useCallback(async (userPrompt: string, modelType: "fast" | "think") => {
     if (!userPrompt.trim() || !user || !conversationId) return;
 
     const userMessage: Message = {
@@ -53,6 +53,7 @@ export function useConversation(conversationId: string | null) {
         conversationId,
         userId: user.id,
         userPrompt,
+        modelType,
       });
 
       if (newTitleGenerated) {

@@ -8,6 +8,7 @@ import { LoadingBubble } from "./loading-bubble";
 import { getLLMResponse } from "@/actions/ai/getLLMResponse";
 import { toast } from "sonner";
 import { ChatMessage } from "./chat-message";
+import { ModelType } from "@/components/model-selector";
 
 const examplePrompts = [
   {
@@ -35,6 +36,7 @@ export function NewChatWelcome() {
   const [isLoading, setIsLoading] = useState(false);
   const [userMessage, setUserMessage] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [modelType, setModelType] = useState<ModelType>("fast");
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -50,6 +52,7 @@ export function NewChatWelcome() {
         conversationId: "",
         userId: session.user.id,
         userPrompt: prompt,
+        modelType,
       });
       router.push(`/chat/${conversationId}`);
     } catch (error) {
@@ -88,6 +91,7 @@ export function NewChatWelcome() {
                 onChange={setInputValue}
                 onSubmit={handleSubmit}
                 isLoading={isLoading}
+                onModelChange={setModelType}
                 placeholder="Describe the scientific concept you want to visualize..."
               />
             </div>
@@ -137,6 +141,7 @@ export function NewChatWelcome() {
             onChange={setInputValue}
             onSubmit={handleSubmit}
             isLoading={isLoading}
+            onModelChange={setModelType}
             placeholder="Describe the scientific concept you want to visualize..."
           />
         </div>

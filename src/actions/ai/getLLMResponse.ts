@@ -5,6 +5,7 @@ import prisma from "@/db/prisma";
 import { systemInstructions } from '@/lib/instruction-prompt';
 import { Message } from "@/types/llm-response";
 import { generateTitle, MessageType } from "@/actions/ai/generateTitle";
+import { ModelType } from "@/components/model-selector";
 
 const openai = new OpenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -15,9 +16,10 @@ type LLMReqType = {
   conversationId?: string;
   userId: string;
   userPrompt: string;
+  modelType: ModelType;
 }
 
-export async function getLLMResponse({ conversationId, userId, userPrompt }: LLMReqType): Promise<{
+export async function getLLMResponse({ conversationId, userId, userPrompt, modelType }: LLMReqType): Promise<{
   assistantResponse: Message;
   conversationId: string;
   newTitleGenerated: boolean;
@@ -57,8 +59,10 @@ export async function getLLMResponse({ conversationId, userId, userPrompt }: LLM
     { role: "user", content: userPrompt }
   ] as OpenAI.ChatCompletionMessageParam[];
 
+  const model = modelType === "fast" ? process.env.GENERATIVE_FAST_LLM_MODEL! : process.env.GENERATIVE_THINK_LLM_MODEL! || "gemini-1.5-flash-latest";
+
   const response = await openai.chat.completions.create({
-    model: process.env.GENERATIVE_LLM_MODEL || "gemini-1.5-flash-latest",
+    model,
     messages: messagesForLLM,
   });
   const assistantMessageContent = response.choices[0].message.content ?? "Sorry, I encountered an issue.";
