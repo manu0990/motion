@@ -6,12 +6,14 @@ import { useSession } from "next-auth/react";
 import { ChatInput } from "@/components/chat/chat-input";
 import { UnifiedMessage } from "./unified-message";
 import { LoadingBubble } from "./loading-bubble";
-import { useConversation } from "@/hooks/use-conversation"; 
+import { useConversation } from "@/hooks/use-conversation";
+import { ModelType } from "@/components/model-selector";
 
 export function ChatInterface() {
   const params = useParams();
   const convoIdFromUrl = (params.conversationId as string) || null;
   const { data: session } = useSession();
+  const [modelType, setModelType] = useState<ModelType>("fast");
 
   const {
     messages,
@@ -35,11 +37,11 @@ export function ChatInterface() {
   }, [messages, isSendingMessage]);
 
   const handleSubmit = useCallback((prompt: string) => {
-    handleSendMessage(prompt);
+    handleSendMessage(prompt, modelType);
     setInputValue("");
-  }, [handleSendMessage]);
+  }, [handleSendMessage, modelType]);
 
-  // Early returns after all hooks are called
+  // Early returns if no session or user
   if (!session?.user) return null;
 
   if (!convoIdFromUrl) {
@@ -81,9 +83,10 @@ export function ChatInterface() {
             <ChatInput
               ref={inputRef}
               value={inputValue}
-              onChange={setInputValue} 
-              onSubmit={handleSubmit} 
+              onChange={setInputValue}
+              onSubmit={handleSubmit}
               isLoading={isSendingMessage}
+              onModelChange={setModelType}
               placeholder="Describe the scientific concept you want to visualize..."
             />
           </div>
