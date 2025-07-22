@@ -63,7 +63,7 @@ export function NewChatWelcome() {
       setInputValue(prompt);
       setIsLoading(false);
     }
-  }, [session?.user, router, isLoading]);
+  }, [session?.user, router, isLoading, modelType]);
 
   useEffect(() => {
     if (userMessage) {
