@@ -1,8 +1,8 @@
 import prisma from "@/db/prisma";
 
 
-export const DAILY_TOKEN_LIMIT = 250000;
-export const DAILY_VIDEO_LIMIT = 5;
+export const DAILY_TOKEN_LIMIT = 150000;
+export const DAILY_VIDEO_LIMIT = 3;
 
 export interface RateLimitResult {
   allowed: boolean;

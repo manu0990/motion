@@ -18,8 +18,8 @@ interface UsageStats {
   };
 }
 
-const DAILY_TOKEN_LIMIT = 250000;
-const DAILY_VIDEO_LIMIT = 5;
+const DAILY_TOKEN_LIMIT = 150000;
+const DAILY_VIDEO_LIMIT = 3;
 
 export function UsageStatsCard() {
   const [stats, setStats] = useState<UsageStats | null>(null);
@@ -163,7 +163,7 @@ export function UsageStatsCard() {
         {tokenPercentage >= 90 && (
           <div className="rounded-md bg-destructive/10 p-3">
             <p className="text-sm text-destructive">
-              ⚠️ You&apos;re approaching your daily token limit. Consider upgrading for unlimited usage.
+              ⚠️ You&apos;re approaching your daily token limit.
             </p>
           </div>
         )}

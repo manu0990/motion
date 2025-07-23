@@ -15,8 +15,8 @@ interface UsageStats {
   };
 }
 
-const DAILY_TOKEN_LIMIT = 250000;
-const DAILY_VIDEO_LIMIT = 5;
+const DAILY_TOKEN_LIMIT = 150000;
+const DAILY_VIDEO_LIMIT = 3;
 
 export function RateLimitAlert() {
   const [stats, setStats] = useState<UsageStats | null>(null);

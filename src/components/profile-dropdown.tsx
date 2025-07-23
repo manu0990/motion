@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -14,16 +15,26 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Palette, Github, FileText, LogOut, Sun, Moon, Monitor, Check, ArrowUpRightFromSquareIcon } from "lucide-react";
+import { Palette, FileText, LogOut, Sun, Moon, Monitor, Check, Crown } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { PricingPopup } from "./pricing-popup";
 
 export function ProfileDropdown() {
   const session = useSession();
   const user = session.data?.user;
   const { setTheme, theme } = useTheme();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [pricingOpen, setPricingOpen] = useState(false);
+
+  // Closing dropdown first to make sure popup is opened
+  const handlePricingClick = () => {
+    setDropdownOpen(false);
+    setPricingOpen(true);
+  };
 
   return (
-    <DropdownMenu>
+    <>
+      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
       <DropdownMenuTrigger asChild>
         <Avatar className="cursor-pointer">
           <AvatarImage
@@ -73,16 +84,13 @@ export function ProfileDropdown() {
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
-        <DropdownMenuItem asChild>
-          <Link href="https://github.com/manu-0990/motion" target="_blank" rel="noopener noreferrer" className="cursor-pointer" tabIndex={0}>
-            <Github className="mr-2 h-4 w-4" />
-            <span>GitHub</span>
-            <ArrowUpRightFromSquareIcon className="ml-auto h-4 w-4" />
-          </Link>
-        </DropdownMenuItem>
 
         <DropdownMenuSeparator />
 
+        <DropdownMenuItem className="cursor-pointer" onClick={handlePricingClick} tabIndex={0}>
+          <Crown className="mr-2 h-4 w-4" />
+          <span>Upgrade plan</span>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/policies/" className="cursor-pointer">
             <FileText className="mr-2 h-4 w-4" />
@@ -98,5 +106,8 @@ export function ProfileDropdown() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    
+    <PricingPopup open={pricingOpen} onOpenChange={setPricingOpen} />
+    </>
   );
 }
