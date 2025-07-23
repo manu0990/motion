@@ -1,42 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { X, AlertTriangle } from "lucide-react";
-import axios from "axios";
-
-interface UsageStats {
-  tokensUsed: number;
-  videosCreated: number;
-  remaining: {
-    tokens: number;
-    videos: number;
-  };
-}
+import { useUsageStats } from "@/context/UsageStatsProvider";
 
 const DAILY_TOKEN_LIMIT = 150000;
 const DAILY_VIDEO_LIMIT = 3;
 
 export function RateLimitAlert() {
-  const [stats, setStats] = useState<UsageStats | null>(null);
+  const { stats } = useUsageStats();
   const [dismissed, setDismissed] = useState(false);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await axios.get('/api/usage');
-        setStats(response.data);
-      } catch (error) {
-        console.error('Failed to fetch usage stats for alert:', error);
-      }
-    };
-
-    fetchStats();
-    
-    const interval = setInterval(fetchStats, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   if (!stats || dismissed) return null;
 

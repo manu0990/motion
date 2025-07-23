@@ -3,12 +3,22 @@
 import prisma from "@/db/prisma";
 import axios from "axios";
 import { revalidatePath } from "next/cache";
-import { checkVideoRateLimit, incrementVideoCount } from "@/lib/rate-limiting";
+import { checkVideoRateLimit, incrementVideoCount, getUserUsageStats } from "@/lib/rate-limiting";
+
+interface UsageStats {
+  tokensUsed: number;
+  videosCreated: number;
+  remaining: {
+    tokens: number;
+    videos: number;
+  };
+}
 
 type ReturnType = {
   status: "success" | "error";
   message: string;
   videoId: string | null;
+  usageStats?: UsageStats;
 };
 
 const retryAxios = async <T>(fn: () => Promise<T>, retries = 3): Promise<T> => {
@@ -118,6 +128,9 @@ export const approveAndGenerateVideo = async (
 
     await incrementVideoCount(message.conversation.userId);
 
+    // Get updated usage stats
+    const updatedStats = await getUserUsageStats(message.conversation.userId);
+
     if (transactionResult.conversationId) {
       revalidatePath(`/chat/${transactionResult.conversationId}`);
     }
@@ -126,6 +139,7 @@ export const approveAndGenerateVideo = async (
       status: "success",
       message: successMessage || "Video generated and saved successfully!",
       videoId: transactionResult.newVideoId,
+      usageStats: updatedStats || undefined,
     };
 
   } catch (error) {

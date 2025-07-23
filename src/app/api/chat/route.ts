@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { getLLMResponse } from "@/actions/ai/getLLMResponse";
+import { getUserUsageStats } from "@/lib/rate-limiting";
 import { z } from "zod";
 
 const chatSchema = z.object({
@@ -38,7 +39,19 @@ export async function POST(request: NextRequest) {
         modelType,
       });
 
-      return NextResponse.json(result);
+      // Get updated usage stats to include in headers
+      const updatedStats = await getUserUsageStats(session.user.id);
+      
+      const response = NextResponse.json(result);
+      
+      if (updatedStats) {
+        response.headers.set('X-RateLimit-Token-Used', updatedStats.tokensUsed.toString());
+        response.headers.set('X-RateLimit-Token-Remaining', updatedStats.remaining.tokens.toString());
+        response.headers.set('X-RateLimit-Video-Used', updatedStats.videosCreated.toString());
+        response.headers.set('X-RateLimit-Video-Remaining', updatedStats.remaining.videos.toString());
+      }
+
+      return response;
     } catch (error) {
       if (error instanceof Error && error.message.includes("Rate limit")) {
         return NextResponse.json(
