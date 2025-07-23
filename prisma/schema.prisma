@@ -17,6 +17,10 @@ model User {
   password      String?
   role          Role      @default(USER)
 
+  tokensUsedToday    Int      @default(0)
+  videosCreatedToday Int      @default(0)
+  lastResetDate      DateTime @default(now())
+
   accounts     Account[]
   sessions     Session[]
   conversation Conversation[]

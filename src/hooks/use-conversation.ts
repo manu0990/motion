@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Message } from "@/types/llm-response";
-import { getLLMResponse } from "@/actions/ai/getLLMResponse";
 import { approveAndGenerateVideo } from "@/actions/server/handleApproval";
 import rejectGenerateVideo from "@/actions/server/handleRejection";
 import axios from "axios";
@@ -49,21 +48,33 @@ export function useConversation(conversationId: string | null) {
     setIsSendingMessage(true);
 
     try {
-      const { assistantResponse, newTitleGenerated } = await getLLMResponse({
-        conversationId,
-        userId: user.id,
+      const response = await axios.post('/api/chat', {
         userPrompt,
+        conversationId,
         modelType,
       });
+
+      const { assistantResponse, newTitleGenerated } = response.data;
 
       if (newTitleGenerated) {
         mutate("/api/conversations");
       }
 
       await mutateMessages(prev => [...(prev || []), assistantResponse], false);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error sending message:", error);
-      toast.error("Failed to send message. Please try again.");
+      
+      if (axios.isAxiosError(error) && error.response?.status === 429) {
+        const errorData = error.response?.data;
+        if (errorData?.type === 'RATE_LIMIT_EXCEEDED') {
+          toast.error(errorData.error || "Rate limit exceeded. Please try again later.");
+        } else {
+          toast.error("Too many requests. Please try again later.");
+        }
+      } else {
+        toast.error("Failed to send message. Please try again.");
+      }
+      
       await mutateMessages(prev => prev?.slice(0, -1) || [], false);
     } finally {
       setIsSendingMessage(false);

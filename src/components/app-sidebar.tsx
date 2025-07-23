@@ -13,6 +13,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { SearchDialog } from "@/components/search-dialog";
+import { UsageStatsCard } from "@/components/usage-stats-card";
 import Image from "next/image";
 import Link from "next/link";
 import useSWR from "swr";
@@ -87,6 +88,14 @@ export function AppSidebar() {
                 );
               })}
             </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <div className="">
+              <UsageStatsCard />
+            </div>
           </SidebarGroupContent>
         </SidebarGroup>
 
