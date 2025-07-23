@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ChatInput } from "@/components/chat/chat-input";
 import { LoadingBubble } from "./loading-bubble";
-import { getLLMResponse } from "@/actions/ai/getLLMResponse";
+import { RateLimitAlert } from "@/components/rate-limit-alert";
 import { toast } from "sonner";
 import { ChatMessage } from "./chat-message";
 import { ModelType } from "@/components/model-selector";
+import axios from "axios";
 
 const examplePrompts = [
   {
@@ -48,16 +49,28 @@ export function NewChatWelcome() {
     setIsLoading(true);
 
     try {
-      const { conversationId } = await getLLMResponse({
-        conversationId: "",
-        userId: session.user.id,
+      const response = await axios.post('/api/chat', {
         userPrompt: prompt,
+        conversationId: "",
         modelType,
       });
+
+      const { conversationId } = response.data;
       router.push(`/chat/${conversationId}`);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error creating conversation:", error);
-      toast.error("Failed to start conversation. Please try again.");
+
+      if (axios.isAxiosError(error) && error.response?.status === 429) {
+        const errorData = error.response?.data;
+        if (errorData?.type === 'RATE_LIMIT_EXCEEDED') {
+          toast.error(errorData.error || "Rate limit exceeded. Please try again later.");
+        } else {
+          toast.error("Too many requests. Please try again later.");
+        }
+      } else {
+        toast.error("Failed to start conversation. Please try again.");
+      }
+
       setUserMessage(null);
       setShowWelcome(true);
       setInputValue(prompt);
@@ -78,6 +91,7 @@ export function NewChatWelcome() {
       <div className="container mx-auto h-[calc(100vh-3.5rem)] w-full flex flex-col justify-between gap-1 pb-1">
         <div className="flex flex-1 flex-col rounded-md bg-card">
           <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+            <RateLimitAlert />
             <ChatMessage message={{ id: Date.now().toString(), role: "user", timestamp: new Date(), content: userMessage }} />
             {isLoading && <LoadingBubble />}
             <div ref={messagesEndRef} />
@@ -109,6 +123,10 @@ export function NewChatWelcome() {
       <div className="h-0 w-full lg:hidden" />
 
       <main className="flex flex-col justify-center items-center gap-8">
+        <div className="w-full max-w-4xl">
+          <RateLimitAlert />
+        </div>
+
         <div className="text-center space-y-4 max-w-2xl">
           <h1 className="text-3xl font-semibold tracking-tight text-primary">
             Let&apos;s bring math to motion!

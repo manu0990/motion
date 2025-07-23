@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { ChatInput } from "@/components/chat/chat-input";
 import { UnifiedMessage } from "./unified-message";
 import { LoadingBubble } from "./loading-bubble";
+import { RateLimitAlert } from "@/components/rate-limit-alert";
 import { useConversation } from "@/hooks/use-conversation";
 import { ModelType } from "@/components/model-selector";
 
@@ -66,6 +67,7 @@ export function ChatInterface() {
     <div className="container mx-auto h-[calc(100vh-3.5rem)] w-full flex flex-col justify-between gap-1 pb-1">
       <div className="flex flex-1 flex-col rounded-md bg-card">
         <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+          <RateLimitAlert />
           {messages.map((message) => (
             <UnifiedMessage
               key={message.id}

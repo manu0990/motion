@@ -3,6 +3,7 @@
 import prisma from "@/db/prisma";
 import axios from "axios";
 import { revalidatePath } from "next/cache";
+import { checkVideoRateLimit, incrementVideoCount } from "@/lib/rate-limiting";
 
 type ReturnType = {
   status: "success" | "error";
@@ -33,6 +34,32 @@ export const approveAndGenerateVideo = async (
     return {
       status: "error",
       message: "Code content cannot be empty.",
+      videoId: null,
+    };
+  }
+
+  const message = await prisma.message.findUnique({
+    where: { id: messageId },
+    include: {
+      conversation: {
+        select: { userId: true }
+      }
+    }
+  });
+
+  if (!message) {
+    return {
+      status: "error",
+      message: "Message not found.",
+      videoId: null,
+    };
+  }
+
+  const rateLimitCheck = await checkVideoRateLimit(message.conversation.userId);
+  if (!rateLimitCheck.allowed) {
+    return {
+      status: "error",
+      message: rateLimitCheck.message || "Video generation rate limit exceeded",
       videoId: null,
     };
   }
@@ -89,6 +116,7 @@ export const approveAndGenerateVideo = async (
       return { newVideoId: video.id, conversationId: updatedMessage.conversation?.id };
     });
 
+    await incrementVideoCount(message.conversation.userId);
 
     if (transactionResult.conversationId) {
       revalidatePath(`/chat/${transactionResult.conversationId}`);
