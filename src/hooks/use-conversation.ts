@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Message } from "@/types/llm-response";
 import { approveAndGenerateVideo } from "@/actions/server/handleApproval";
 import rejectGenerateVideo from "@/actions/server/handleRejection";
+import { useUsageStats } from "@/context/UsageStatsProvider";
 import axios from "axios";
 
 const fetcher = (url: string) => axios.get(url).then(res => res.data);
@@ -16,6 +17,7 @@ export function useConversation(conversationId: string | null) {
   const router = useRouter();
   const { data: session } = useSession();
   const user = session?.user;
+  const { updateStatsFromResponse } = useUsageStats();
 
   const { data: messages = [], mutate: mutateMessages, error } = useSWR<Message[]>(
     user && conversationId ? `/api/chat/${conversationId}` : null,
@@ -56,6 +58,9 @@ export function useConversation(conversationId: string | null) {
 
       const { assistantResponse, newTitleGenerated } = response.data;
 
+      // Update usage stats from response headers
+      updateStatsFromResponse(response);
+
       if (newTitleGenerated) {
         mutate("/api/conversations");
       }
@@ -79,7 +84,7 @@ export function useConversation(conversationId: string | null) {
     } finally {
       setIsSendingMessage(false);
     }
-  }, [user, conversationId, mutateMessages]);
+  }, [user, conversationId, mutateMessages, updateStatsFromResponse]);
 
   const handleApproveCode = useCallback(async (messageId: string, codeContent: string) => {
     setLoadingMessageId(messageId);
@@ -89,6 +94,19 @@ export function useConversation(conversationId: string | null) {
 
       if (res.status === 'success' && res.videoId) {
         toast.success(res.message);
+        
+        // Update usage stats if included in response
+        if (res.usageStats) {
+          updateStatsFromResponse({
+            headers: {
+              'x-ratelimit-token-used': res.usageStats.tokensUsed.toString(),
+              'x-ratelimit-token-remaining': res.usageStats.remaining.tokens.toString(),
+              'x-ratelimit-video-used': res.usageStats.videosCreated.toString(),
+              'x-ratelimit-video-remaining': res.usageStats.remaining.videos.toString(),
+            }
+          });
+        }
+        
         mutateMessages(currentMessages =>
           currentMessages?.map(msg =>
             msg.id === messageId
@@ -106,7 +124,7 @@ export function useConversation(conversationId: string | null) {
     } finally {
       setLoadingMessageId(null);
     }
-  }, [mutateMessages]);
+  }, [mutateMessages, updateStatsFromResponse]);
 
   const handleRejectCode = useCallback(async (messageId: string) => {
     setLoadingMessageId(messageId);

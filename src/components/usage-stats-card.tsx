@@ -1,48 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MessageSquare, Video, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
+import { useUsageStats } from "@/context/UsageStatsProvider";
 
-interface UsageStats {
-  tokensUsed: number;
-  videosCreated: number;
-  remaining: {
-    tokens: number;
-    videos: number;
-  };
-}
-
-const DAILY_TOKEN_LIMIT = 250000;
-const DAILY_VIDEO_LIMIT = 5;
+const DAILY_TOKEN_LIMIT = 150000;
+const DAILY_VIDEO_LIMIT = 3;
 
 export function UsageStatsCard() {
-  const [stats, setStats] = useState<UsageStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { stats, loading, error, refreshStats } = useUsageStats();
 
-  const fetchStats = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.get('/api/usage');
-      setStats(response.data);
-    } catch (err) {
-      console.error('Error fetching usage stats:', err);
-      setError('Failed to load usage statistics');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Load initial stats when component mounts
   useEffect(() => {
-    fetchStats();
-  }, []);
+    if (!stats && !loading) {
+      refreshStats();
+    }
+  }, [stats, loading, refreshStats]);
 
   if (loading) {
     return (
@@ -93,7 +71,7 @@ export function UsageStatsCard() {
           <CardDescription>{error || 'Unable to load usage statistics'}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={fetchStats} variant="outline" size="sm" disabled={loading}>
+          <Button onClick={refreshStats} variant="outline" size="sm" disabled={loading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Loading...' : 'Retry'}
           </Button>
@@ -116,7 +94,7 @@ export function UsageStatsCard() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Daily Usage</CardTitle>
-          <Button onClick={fetchStats} variant="ghost" size="sm" disabled={loading}>
+          <Button onClick={refreshStats} variant="ghost" size="sm" disabled={loading}>
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
@@ -163,7 +141,7 @@ export function UsageStatsCard() {
         {tokenPercentage >= 90 && (
           <div className="rounded-md bg-destructive/10 p-3">
             <p className="text-sm text-destructive">
-              ⚠️ You&apos;re approaching your daily token limit. Consider upgrading for unlimited usage.
+              ⚠️ You&apos;re approaching your daily token limit.
             </p>
           </div>
         )}

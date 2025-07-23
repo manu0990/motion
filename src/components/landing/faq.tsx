@@ -33,7 +33,7 @@ export function FAQ() {
     },
     {
       question: "Is there a limit to how many videos I can create?",
-      answer: "Yes, we have daily limits to ensure fair usage for all users. Free accounts can use up to 250,000 tokens per day for AI interactions and create up to 5 videos per day. These limits reset daily at midnight UTC. Premium plans offer higher limits or unlimited usage."
+      answer: "Yes, we have daily limits to ensure fair usage for all users. Free accounts can use up to 150,000 tokens per day for AI interactions and create up to 3 videos per day. These limits reset daily at midnight UTC. Premium plans offer higher limits or unlimited usage."
     }
   ];
 
