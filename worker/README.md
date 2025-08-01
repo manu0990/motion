@@ -112,6 +112,8 @@ worker/
 | `AWS_ACCESS_KEY_ID`     | Your AWS access key ID.                                              |   Yes    |
 | `AWS_SECRET_ACCESS_KEY` | Your AWS secret access key.                                          |   Yes    |
 | `S3_ENDPOINT`           | The endpoint URL for an S3-compatible storage service (e.g., MinIO). |    No    |
+| `MOTION_HOST_ORIGIN`    | The origin URL of the Motion host (for CORS).                        |    Yes   |
+| `USE_MANIM_DOCKER`      | Whether to use Docker for running Manim.                              |    No    |
 
 ---
 

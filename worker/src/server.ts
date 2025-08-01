@@ -4,7 +4,6 @@ import { z } from 'zod';
 import fs from 'fs-extra';
 import { runManimScript, ManimQuality } from './services/manimService';
 import { uploadFileToCloud } from './services/uploadService';
-import { randomUUID } from 'crypto';
 
 const createJobSchema = z.object({
   codeContent: z.string().trim().min(1, 'Code content cannot be empty.'),
@@ -13,7 +12,7 @@ const createJobSchema = z.object({
 
 const app: Express = express();
 
-app.use(cors());
+app.use(cors({origin: process.env.MOTION_HOST_ORIGIN,}));
 app.use(express.json());
 
 // @ts-ignore

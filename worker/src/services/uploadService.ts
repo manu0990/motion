@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, S3ClientConfig } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, S3ClientConfig } from '@aws-sdk/client-s3';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
