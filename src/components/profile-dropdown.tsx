@@ -15,7 +15,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Palette, FileText, LogOut, Sun, Moon, Monitor, Check, Crown } from "lucide-react";
+import { Palette, FileText, LogOut, Sun, Moon, Monitor, Check, Crown, Github, ExternalLink } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { PricingPopup } from "./pricing-popup";
 
@@ -35,79 +35,87 @@ export function ProfileDropdown() {
   return (
     <>
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-      <DropdownMenuTrigger asChild>
-        <Avatar className="cursor-pointer">
-          <AvatarImage
-            src={user?.image}
-            alt="user-profile"
-            className="object-cover transition-all cursor-pointer"
-          />
-          <AvatarFallback className="cursor-pointer bg-teal-600">
-            {user?.name?.[0].toUpperCase() || "U"}
-          </AvatarFallback>
-        </Avatar>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">
-              {user?.name || "User"}
-            </p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {user?.email}
-            </p>
-          </div>
-        </DropdownMenuLabel>
+        <DropdownMenuTrigger asChild>
+          <Avatar className="cursor-pointer">
+            <AvatarImage
+              src={user?.image}
+              alt="user-profile"
+              className="object-cover transition-all cursor-pointer"
+            />
+            <AvatarFallback className="cursor-pointer bg-teal-600">
+              {user?.name?.[0].toUpperCase() || "U"}
+            </AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">
+                {user?.name || "User"}
+              </p>
+              <p className="text-xs leading-none text-muted-foreground">
+                {user?.email}
+              </p>
+            </div>
+          </DropdownMenuLabel>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator />
 
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <Palette className="mr-2 h-4 w-4" />
-            <span>Appearance</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              <Sun className="mr-2 h-4 w-4" />
-              <span>Light</span>
-              {theme === "light" && <Check className="ml-auto h-4 w-4" />}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Palette className="mr-2 h-4 w-4" />
+              <span>Appearance</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                <Sun className="mr-2 h-4 w-4" />
+                <span>Light</span>
+                {theme === "light" && <Check className="ml-auto h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <Moon className="mr-2 h-4 w-4" />
+                <span>Dark</span>
+                {theme === "dark" && <Check className="ml-auto h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                <Monitor className="mr-2 h-4 w-4" />
+                <span>System</span>
+                {theme === "system" && <Check className="ml-auto h-4 w-4" />}
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+
+            <DropdownMenuItem asChild>
+              <Link href="https://github.com/manu0990/motion" target="_blank" rel="noopener noreferrer" className="cursor-pointer">
+                <Github className="mr-2 h-4 w-4" />
+                <span>GitHub</span>
+                <ExternalLink className="ml-auto h-4 w-4" />
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              <Moon className="mr-2 h-4 w-4" />
-              <span>Dark</span>
-              {theme === "dark" && <Check className="ml-auto h-4 w-4" />}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
-              <Monitor className="mr-2 h-4 w-4" />
-              <span>System</span>
-              {theme === "system" && <Check className="ml-auto h-4 w-4" />}
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+          </DropdownMenuSub>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator />
 
-        <DropdownMenuItem className="cursor-pointer" onClick={handlePricingClick} tabIndex={0}>
-          <Crown className="mr-2 h-4 w-4" />
-          <span>Upgrade plan</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/policies/" className="cursor-pointer">
-            <FileText className="mr-2 h-4 w-4" />
-            <span>Privacy Policy</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          className="cursor-pointer text-red-600 focus:text-red-600"
-          onClick={() => signOut({ callbackUrl: "/" })}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Sign out</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-    
-    <PricingPopup open={pricingOpen} onOpenChange={setPricingOpen} />
+          <DropdownMenuItem className="cursor-pointer" onClick={handlePricingClick} tabIndex={0}>
+            <Crown className="mr-2 h-4 w-4" />
+            <span>Upgrade plan</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/policies/" className="cursor-pointer">
+              <FileText className="mr-2 h-4 w-4" />
+              <span>Privacy Policy</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer text-red-600 focus:text-red-600"
+            onClick={() => signOut({ callbackUrl: "/" })}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Sign out</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <PricingPopup open={pricingOpen} onOpenChange={setPricingOpen} />
     </>
   );
 }
