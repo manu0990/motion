@@ -6,6 +6,9 @@ import { CodeDisplay } from "./code-display";
 import { VideoPlayer } from "./video-player";
 import { Message } from "@/types/llm-response";
 import { parseStringIntoBlocks } from "@/lib/stringParser";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { unifiedMessageMarkdownComponents } from './markdown-components';
 
 type UnifiedMessageType = {
   message: Message;
@@ -24,9 +27,14 @@ export function UnifiedMessage({ message, onApprove, onReject, isLoading }: Unif
         {contentBlocks.length > 0 ? (
           contentBlocks.map((block, idx) =>
             block.type === "text" ? (
-              <p key={idx} className="whitespace-pre-wrap">
-                {block.content}
-              </p>
+              <div key={idx} className="prose dark:prose-invert max-w-none prose-zinc text-base">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={unifiedMessageMarkdownComponents}
+                >
+                  {block.content}
+                </ReactMarkdown>
+              </div>
             ) : (
               <div key={idx} className="my-4">
                 <CodeDisplay
