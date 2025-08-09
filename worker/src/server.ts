@@ -32,7 +32,7 @@ app.post('/api/render', async (req: Request, res: Response) => {
     const { codeContent, quality: qualityFlag } = parseResult.data;
     const qualityChar = qualityFlag ? (qualityFlag.charAt(2) as ManimQuality) : undefined;
 
-    console.log(`Starting Manim job with flag: ${qualityFlag || 'default'}`);
+    // console.log(`Starting Manim job with flag: ${qualityFlag || 'default'}`);
 
     const { videoFilePath, tempDirPath: jobTempDir, sceneName: detectedSceneName } = await runManimScript(
       codeContent,
@@ -41,7 +41,7 @@ app.post('/api/render', async (req: Request, res: Response) => {
 
     tempDirPath = jobTempDir;
 
-    console.log(`Manim job successful for scene "${detectedSceneName}". Video at: ${videoFilePath}`);
+    // console.log(`Manim job successful for scene "${detectedSceneName}". Video at: ${videoFilePath}`);
 
     const uploadResult = await uploadFileToCloud(
       videoFilePath,
@@ -55,13 +55,13 @@ app.post('/api/render', async (req: Request, res: Response) => {
 
 
   } catch (err: any) {
-    console.error(`Failed to create video:`, err);
+    // console.error(`Failed to create video:`, err);
     return res.status(500).json({
       message: err.message || 'An unexpected error occurred during rendering.',
     });
   } finally {
     if (tempDirPath) {
-      console.log(`Cleaning up temporary directory: ${tempDirPath}`);
+      // console.log(`Cleaning up temporary directory: ${tempDirPath}`);
       await fs.remove(tempDirPath);
     }
   }

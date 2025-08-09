@@ -44,12 +44,14 @@ export const runManimScript = async (
 
     const command = `cd ${tempDirPath} && manim render ${pythonScriptName} ${sceneName} ${qualityFlag}`;
 
-    console.log(`Executing Manim Job [${uniqueId}]: ${command}`);
+    // console.log(`Executing Manim Job [${uniqueId}]: ${command}`);
 
-    const { stdout, stderr } = await execAsync(command, { timeout: timeoutMs });
+    // this will contain the output and errors, uncomment to view
+    // const { stdout, stderr } = 
+    await execAsync(command, { timeout: timeoutMs });
 
-    if (stderr) console.warn(`Manim Job [${uniqueId}] Stderr:\n`, stderr);
-    if (stdout) console.log(`Manim Job [${uniqueId}] Stdout:\n`, stdout);
+    // if (stderr) console.warn(`Manim Job [${uniqueId}] Stderr:\n`, stderr);
+    // if (stdout) console.log(`Manim Job [${uniqueId}] Stdout:\n`, stdout);
 
     // Find the output file within the temp directory
     const mediaDir = path.join(tempDirPath, 'media', 'videos', pythonScriptName.replace('.py', ''), '720p30'); // <-- as defaulted to -qm so 720p30 works
@@ -61,7 +63,7 @@ export const runManimScript = async (
     }
 
     const videoFilePath = path.join(mediaDir, videoFile);
-    console.log(`Manim Job [${uniqueId}] successful. Video found at: ${videoFilePath}`);
+    // console.log(`Manim Job [${uniqueId}] successful. Video found at: ${videoFilePath}`);
 
     return {
       videoFilePath: videoFilePath,
@@ -73,6 +75,6 @@ export const runManimScript = async (
     await fse.remove(tempDirPath).catch(cleanupError => {
       console.error(`Failed to clean up temp directory ${tempDirPath} for job [${uniqueId}]`, cleanupError);
     });
-    throw new Error(`Manim script execution failed for job [${uniqueId}]. Reason: ${error.message}`);
+    throw new Error(`Manim script execution failed for job [${uniqueId}].`);
   }
 };

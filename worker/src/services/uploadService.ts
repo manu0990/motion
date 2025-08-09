@@ -62,9 +62,9 @@ export const uploadFileToCloud = async (
       ContentType: 'video/mp4',
     });
 
-    console.log(`Uploading file to S3 with key: ${s3Key}`);
+    // console.log(`Uploading file to S3 with key: ${s3Key}`);
     await s3Client.send(putCommand);
-    console.log(`Successfully uploaded file.`);
+    // console.log(`Successfully uploaded file.`);
 
     return {
       key: s3Key,
