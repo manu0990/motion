@@ -15,20 +15,20 @@ import { useUsageStats } from "@/context/UsageStatsProvider";
 
 const examplePrompts = [
   {
-    title: "Physics Simulation",
-    prompt: "Create a pendulum animation showing the relationship between potential and kinetic energy"
+    title: "Pythagorean Theorem",
+    prompt: "Draw a right triangle with sides a, b, and c. Add proportional squares on each side. Animate triangle → square on a → square on b → square on c. Then transform the two smaller squares into the large one."
   },
   {
-    title: "Chemistry Visualization",
-    prompt: "Animate the process of photosynthesis showing light reactions and Calvin cycle"
+    title: "Vector Addition",
+    prompt: "Draw (x, y) axis then draw vectors A (blue) and B (green) from origin. Move B so its tail is at A’s head. Draw resultant C (red) from origin to B’s head. Label all vectors."
   },
   {
-    title: "Biology Animation",
-    prompt: "Show how DNA replication works with helicase unwinding the double helix"
+    title: "Stack Data Structure",
+    prompt: "Draw a vertical stack of rectangles. Push blocks 1, 2, 3 on top one by one, then pop them off one by one until empty. Label 'Stack'."
   },
   {
-    title: "Mathematics Concept",
-    prompt: "Visualize the Fourier transform converting a time domain signal to frequency domain"
+    title: "Simple Circular Orbit",
+    prompt: "Draw a large yellow circle (star) at center and a smaller blue circle (planet) orbiting it in a visible circular path at constant speed."
   }
 ];
 
@@ -152,7 +152,7 @@ export function NewChatWelcome() {
               disabled={isLoading}
             >
               <h3 className="font-semibold text-sm mb-2">{example.title}</h3>
-              <p className="text-xs text-muted-foreground">{example.prompt}</p>
+              <p className="text-xs text-muted-foreground line-clamp-2 overflow-hidden">{example.prompt}</p>
             </button>
           ))}
         </div>
