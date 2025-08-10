@@ -99,7 +99,15 @@ export function UsageStatsCard() {
           </Button>
         </div>
         <CardDescription>
-          Your current usage for today. Limits reset daily at midnight UTC.
+          Resets in {(() => {
+            const now = new Date();
+            const midnight = new Date(now);
+            midnight.setUTCHours(24, 0, 0, 0);
+            const diff = midnight.getTime() - now.getTime();
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            return `${hours}h ${minutes}m`;
+          })()}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -111,12 +119,12 @@ export function UsageStatsCard() {
               <span className="text-sm pr-2 font-medium">Tokens </span>
             </div>
             <Badge variant={getUsageColor(tokenPercentage)}>
-              {stats.tokensUsed.toLocaleString()} / {DAILY_TOKEN_LIMIT.toLocaleString()}
+              {stats.tokensUsed > 100000 ? (stats.tokensUsed / 1000).toFixed(2).toLocaleString() : (stats.tokensUsed)} / {DAILY_TOKEN_LIMIT / 1000}k
             </Badge>
           </div>
           <Progress value={tokenPercentage} className="h-2" />
           <p className="text-xs text-muted-foreground">
-            {stats.remaining.tokens.toLocaleString()} tokens remaining
+            {(stats.remaining.tokens / 1000).toFixed(0).toLocaleString()}k tokens remaining
           </p>
         </div>
 
@@ -139,19 +147,15 @@ export function UsageStatsCard() {
 
         {/* Warning Messages */}
         {tokenPercentage >= 90 && (
-          <div className="rounded-md bg-destructive/10 p-3">
-            <p className="text-sm text-destructive">
-              ⚠️ You&apos;re approaching your daily token limit.
-            </p>
-          </div>
+          <p className="text-sm text-destructive">
+            Reaching daily token limit.
+          </p>
         )}
 
-        {videoPercentage >= 80 && (
-          <div className="rounded-md bg-destructive/10 p-3">
-            <p className="text-sm text-destructive">
-              ⚠️ You&apos;re approaching your daily video generation limit.
-            </p>
-          </div>
+        {videoPercentage >= 65 && (
+          <p className="text-sm text-destructive">
+            Reaching daily video generation limit.
+          </p>
         )}
       </CardContent>
     </Card>
