@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { ChatMessage } from "./chat-message";
 import { ModelType } from "@/components/model-selector";
 import axios from "axios";
+import { mutate } from "swr";
+import { useUsageStats } from "@/context/UsageStatsProvider";
 
 const examplePrompts = [
   {
@@ -33,6 +35,7 @@ const examplePrompts = [
 export function NewChatWelcome() {
   const router = useRouter();
   const { data: session } = useSession();
+  const { updateStatsFromResponse } = useUsageStats();
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [userMessage, setUserMessage] = useState<string | null>(null);
@@ -54,8 +57,12 @@ export function NewChatWelcome() {
         conversationId: "",
         modelType,
       });
-
       const { conversationId } = response.data;
+      
+      // Update usage stats from response headers
+      updateStatsFromResponse(response);
+      // Invalidate the conversations cache to update the sidebar
+      mutate("/api/conversations");
       router.push(`/chat/${conversationId}`);
     } catch (error: unknown) {
       console.error("Error creating conversation:", error);
@@ -76,7 +83,7 @@ export function NewChatWelcome() {
       setInputValue(prompt);
       setIsLoading(false);
     }
-  }, [session?.user, router, isLoading, modelType]);
+  }, [session?.user, router, isLoading, modelType, updateStatsFromResponse]);
 
   useEffect(() => {
     if (userMessage) {
