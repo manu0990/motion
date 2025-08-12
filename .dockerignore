@@ -3,19 +3,41 @@
 .gitignore
 
 # Docker
-Dockerfile
-docker-compose.yml
-docker-compose.override.yml
+Dockerfile*
+docker-compose*.yml
+.dockerignore
 
 # Dependencies
 node_modules
 
 # Build output
+.next
 dist
+out
 *.tsbuildinfo
 
 # Environment
 .env*
+
+# Next.js
+.vercel
+.vercelignore
+
+# Testing
+coverage
+.nyc_output
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
 # Manim job output directory on host
 worker-jobs/
@@ -24,3 +46,4 @@ worker-jobs/
 .vscode/
 .idea/
 *.DS_Store
+README.md
