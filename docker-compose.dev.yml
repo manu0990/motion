@@ -23,13 +23,13 @@ services:
       context: .
       dockerfile: Dockerfile.app.dev
       args:
-        - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-        - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-        - GENERATIVE_FAST_LLM_MODEL=${GENERATIVE_FAST_LLM_MODEL:-}
-        - GENERATIVE_THINK_LLM_MODEL=${GENERATIVE_THINK_LLM_MODEL:-}
-        - WORKER_URL=${WORKER_URL:-}
-        - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-}
-        - NEXTAUTH_URL=${NEXTAUTH_URL:-}
+        # - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+        # - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+        # - GENERATIVE_FAST_LLM_MODEL=${GENERATIVE_FAST_LLM_MODEL:-}
+        # - GENERATIVE_THINK_LLM_MODEL=${GENERATIVE_THINK_LLM_MODEL:-}
+        # - WORKER_URL=${WORKER_URL:-}
+        # - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-}
+        # - NEXTAUTH_URL=${NEXTAUTH_URL:-}
         - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/motion_dev
     container_name: motion-app-dev
     restart: always
