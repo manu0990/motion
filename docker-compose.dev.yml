@@ -1,15 +1,65 @@
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: motion-postgres-dev
+    environment:
+      POSTGRES_DB: motion_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d motion_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Next.js App Development
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app.dev
+      args:
+        - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+        - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+        - GENERATIVE_FAST_LLM_MODEL=${GENERATIVE_FAST_LLM_MODEL:-}
+        - GENERATIVE_THINK_LLM_MODEL=${GENERATIVE_THINK_LLM_MODEL:-}
+        - WORKER_URL=${WORKER_URL:-}
+        - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-}
+        - NEXTAUTH_URL=${NEXTAUTH_URL:-}
+        - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/motion_dev
+    container_name: motion-app-dev
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/motion_dev
+      - WORKER_URL=http://worker:3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "pnpm db:migrate:prod && pnpm dev"
+
+  # Worker Service Development
   worker:
     build:
       context: ./worker
-      dockerfile: Dockerfile
-      target: builder
+      dockerfile: Dockerfile.dev
     container_name: motion-worker-dev
-    env_file:
-      - .env
+    restart: always
     ports:
       - "3001:3001"
-    volumes:
-      - ./worker:/usr/src/app
-      - /usr/src/app/node_modules
+    env_file:
+      - .env
+    environment:
+      - PORT=3001
+      - MOTION_HOST_ORIGIN=http://localhost:3000
     command: pnpm dev
+
+volumes:
+  postgres_data:
