@@ -1,5 +1,5 @@
 ### Stage 1: Builder
-FROM node:20-bookworm AS builder
+FROM node:22-bookworm AS builder
 
 WORKDIR /usr/src/app
 
@@ -55,7 +55,7 @@ RUN pnpm build
 
 
 ### Stage 2: Production
-FROM node:20-bookworm
+FROM node:22-bookworm
 
 WORKDIR /usr/src/app
 
