@@ -4,14 +4,12 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ChatInput } from "@/components/chat/chat-input";
-import { LoadingBubble } from "./loading-bubble";
 import { RateLimitAlert } from "@/components/rate-limit-alert";
 import { toast } from "sonner";
-import { ChatMessage } from "./chat-message";
+import { UnifiedMessage } from "./unified-message";
 import { ModelType } from "@/components/model-selector";
-import axios from "axios";
 import { mutate } from "swr";
-import { useUsageStats } from "@/context/UsageStatsProvider";
+import { Message } from "@/types/llm-response";
 
 const examplePrompts = [
   {
@@ -35,10 +33,9 @@ const examplePrompts = [
 export function NewChatWelcome() {
   const router = useRouter();
   const { data: session } = useSession();
-  const { updateStatsFromResponse } = useUsageStats();
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [userMessage, setUserMessage] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [showWelcome, setShowWelcome] = useState(true);
   const [modelType, setModelType] = useState<ModelType>("fast");
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -46,61 +43,154 @@ export function NewChatWelcome() {
 
   const handleSubmit = useCallback(async (prompt: string) => {
     if (!prompt.trim() || !session?.user || isLoading) return;
-    setUserMessage(prompt);
+    
+    const userMessage: Message = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: prompt,
+      timestamp: new Date(),
+    };
+
+    setMessages([userMessage]);
     setShowWelcome(false);
     setInputValue("");
     setIsLoading(true);
 
+    // Create placeholder assistant message for streaming
+    const assistantMessageId = crypto.randomUUID();
+    const streamingMessage: Message = {
+      id: assistantMessageId,
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+      isStreaming: true,
+    };
+
+    setMessages(prev => [...prev, streamingMessage]);
+
     try {
-      const response = await axios.post('/api/chat', {
-        userPrompt: prompt,
-        conversationId: "",
-        modelType,
+      const response = await fetch('/api/chat/stream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userPrompt: prompt,
+          modelType,
+        }),
       });
-      const { conversationId } = response.data;
-      
-      // Update usage stats from response headers
-      updateStatsFromResponse(response);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) {
+        throw new Error('No reader available');
+      }
+
+      let conversationId = '';
+      let newTitleGenerated = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+
+              if (data.type === 'metadata') {
+                conversationId = data.conversationId;
+              } else if (data.type === 'content') {
+                // Update streaming message content
+                setMessages(prev => 
+                  prev.map(msg =>
+                    msg.id === assistantMessageId
+                      ? { ...msg, content: msg.content + data.content }
+                      : msg
+                  )
+                );
+              } else if (data.type === 'complete') {
+                // Finalize the message and navigate
+                setMessages(prev =>
+                  prev.map(msg =>
+                    msg.id === assistantMessageId
+                      ? { 
+                          ...msg, 
+                          id: data.messageId,
+                          timestamp: new Date(data.timestamp),
+                          isStreaming: false 
+                        }
+                      : msg
+                  )
+                );
+                newTitleGenerated = data.newTitleGenerated;
+              } else if (data.type === 'error') {
+                throw new Error(data.error);
+              }
+            } catch (parseError) {
+              console.error('Error parsing stream data:', parseError);
+            }
+          }
+        }
+      }
+
       // Invalidate the conversations cache to update the sidebar
-      mutate("/api/conversations");
-      router.push(`/chat/${conversationId}`);
+      if (newTitleGenerated) {
+        mutate("/api/conversations");
+      }
+      
+      // Navigate to the conversation
+      if (conversationId) {
+        router.push(`/chat/${conversationId}`);
+      }
     } catch (error: unknown) {
       console.error("Error creating conversation:", error);
 
-      if (axios.isAxiosError(error) && error.response?.status === 429) {
-        const errorData = error.response?.data;
-        if (errorData?.type === 'RATE_LIMIT_EXCEEDED') {
-          toast.error(errorData.error || "Rate limit exceeded. Please try again later.");
-        } else {
-          toast.error("Too many requests. Please try again later.");
-        }
+      if (error instanceof Error && error.message.includes("429")) {
+        toast.error("Rate limit exceeded. Please try again later.");
       } else {
         toast.error("Failed to start conversation. Please try again.");
       }
 
-      setUserMessage(null);
+      setMessages([]);
       setShowWelcome(true);
       setInputValue(prompt);
+    } finally {
       setIsLoading(false);
     }
-  }, [session?.user, router, isLoading, modelType, updateStatsFromResponse]);
+  }, [session?.user, router, isLoading, modelType]);
 
   useEffect(() => {
-    if (userMessage) {
+    if (messages.length > 0) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [userMessage]);
+  }, [messages]);
 
   if (!session?.user) return null;
 
-  if (!showWelcome && userMessage) {
+  if (!showWelcome && messages.length > 0) {
     return (
       <div className="container mx-auto h-[calc(100vh-3.5rem)] w-full flex flex-col justify-between gap-1 pb-1">
         <div className="flex flex-1 flex-col rounded-md bg-card">
           <div className="flex-1 p-4 space-y-4 overflow-y-auto">
             <RateLimitAlert />
-            <ChatMessage message={{ id: Date.now().toString(), role: "user", timestamp: new Date(), content: userMessage }} />
-            {isLoading && <LoadingBubble />}
+            {messages.map((message) => (
+              <UnifiedMessage
+                key={message.id}
+                message={message}
+                onApprove={() => {}}
+                onReject={() => {}}
+                isLoading={false}
+              />
+            ))}
             <div ref={messagesEndRef} />
           </div>
 
