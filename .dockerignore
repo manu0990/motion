@@ -2,25 +2,50 @@
 .git
 .gitignore
 
-# Docker
-Dockerfile
-docker-compose.yml
-docker-compose.override.yml
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
 
 # Dependencies
 node_modules
 
 # Build output
+.next
 dist
+out
 *.tsbuildinfo
 
-# Environment
+# Environment files
 .env*
 
-# Manim job output directory on host
-worker-jobs/
+# Next.js specific
+.vercel
+.vercelignore
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Output directories
+worker/jobs/*
+worker/dist/*
 
 # IDE / OS specific
 .vscode/
 .idea/
 *.DS_Store
+
+# Documentation
+README.md
+README-*.md
+**.md
+docs/
