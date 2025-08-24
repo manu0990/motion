@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ChatInput } from "@/components/chat/chat-input";
 import { UnifiedMessage } from "./unified-message";
-import { LoadingBubble } from "./loading-bubble";
 import { RateLimitAlert } from "@/components/rate-limit-alert";
 import { useConversation } from "@/hooks/use-conversation";
 import { ModelType } from "@/components/model-selector";
@@ -58,7 +57,9 @@ export function ChatInterface() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <LoadingBubble />
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading conversation...</p>
+        </div>
       </div>
     );
   }
@@ -77,7 +78,6 @@ export function ChatInterface() {
               isLoading={loadingMessageId === message.id}
             />
           ))}
-          {isSendingMessage && <LoadingBubble />}
           <div ref={messagesEndRef} />
         </div>
         <div className="sticky bottom-0 flex flex-col gap-2 p-2 bg-background">

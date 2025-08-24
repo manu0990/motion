@@ -40,92 +40,116 @@ export async function POST(request: NextRequest) {
     const { userPrompt, conversationId: providedConversationId, modelType } = parseResult.data;
     const userId = session.user.id;
 
-    // Calculate token usage for rate limiting
+    // Calculate basic token usage for early rate limiting check
     const promptTokens = countTokens(userPrompt);
     const systemTokens = countTokens(systemInstructions);
 
-    // Get or create conversation
-    let conversationId = providedConversationId;
-    let convo;
-
-    if (!conversationId) {
-      convo = await prisma.conversation.create({
-        data: { user: { connect: { id: userId } } },
-        select: { id: true, title: true }
-      });
-      conversationId = convo.id;
-    } else {
-      convo = await prisma.conversation.findUnique({
-        where: { id: conversationId },
-        select: { id: true, title: true }
-      });
-    }
-
-    if (!convo) {
-      return new Response("Conversation not found", { status: 404 });
-    }
-
-    // Get conversation history
-    const history = await prisma.message.findMany({
-      where: { conversationId, videoId: null },
-      orderBy: { createdAt: "asc" },
-      take: 20,
-    });
-
-    const historyTokens = history.reduce((total, message) => {
-      return total + countTokens(message.content);
-    }, 0);
-
-    const estimatedTotalTokens = systemTokens + historyTokens + promptTokens + (promptTokens * 2);
-
-    // Check rate limits
-    const rateLimitCheck = await checkTokenRateLimit(userId, estimatedTotalTokens);
-    if (!rateLimitCheck.allowed) {
-      return new Response(
-        JSON.stringify({ error: rateLimitCheck.message || "Rate limit exceeded", type: 'RATE_LIMIT_EXCEEDED' }),
-        { status: 429, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    // Save user message
-    await prisma.message.create({
-      data: { author: 'USER', content: userPrompt, conversationId, createdAt: new Date() },
-    });
-
-    // Prepare messages for LLM
-    const messagesForLLM = [
-      { role: "system", content: systemInstructions },
-      ...history.map(m => ({ role: m.author.toLowerCase(), content: m.content })),
-      { role: "user", content: userPrompt }
-    ] as OpenAI.ChatCompletionMessageParam[];
-
-    const model = modelType === "fast"
-      ? process.env.GENERATIVE_FAST_LLM_MODEL!
-      : process.env.GENERATIVE_THINK_LLM_MODEL! || "gemini-1.5-flash-latest";
-
-    // Create streaming response
-    const stream = await openai.chat.completions.create({
-      model,
-      messages: messagesForLLM,
-      stream: true,
-    });
-
-    // Set up streaming response
+    // Set up streaming response immediately
     const encoder = new TextEncoder();
     let fullResponse = "";
 
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          // Send initial metadata
+          // Send initial metadata immediately (streaming starts here)
+          const tempMessageId = crypto.randomUUID();
           const metadata = {
             type: "metadata",
-            conversationId,
-            messageId: crypto.randomUUID(),
+            conversationId: providedConversationId || "pending",
+            messageId: tempMessageId,
           };
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(metadata)}\n\n`));
 
-          // Stream the LLM response
+          // Start setup operations
+          let conversationId = providedConversationId;
+          let convo: { id: string; title: string } | null = null;
+          let history: Array<{
+            id: string;
+            content: string;
+            author: string;
+            createdAt: Date;
+          }> = [];
+          let historyTokens = 0;
+
+          // Get or create conversation and fetch history in parallel
+          const [conversationResult, historyResult] = await Promise.all([
+            (async () => {
+              if (!conversationId) {
+                const newConvo = await prisma.conversation.create({
+                  data: { user: { connect: { id: userId } } },
+                  select: { id: true, title: true }
+                });
+                return { conversationId: newConvo.id, convo: newConvo };
+              } else {
+                const existingConvo = await prisma.conversation.findUnique({
+                  where: { id: conversationId },
+                  select: { id: true, title: true }
+                });
+                return { conversationId, convo: existingConvo };
+              }
+            })(),
+            providedConversationId ? prisma.message.findMany({
+              where: { conversationId: providedConversationId, videoId: null },
+              orderBy: { createdAt: "asc" },
+              take: 20,
+            }) : Promise.resolve([])
+          ]);
+
+          conversationId = conversationResult.conversationId;
+          convo = conversationResult.convo;
+          history = historyResult;
+
+          if (!convo) {
+            throw new Error("Conversation not found");
+          }
+
+          // Update metadata with actual conversation ID if it was created
+          if (!providedConversationId) {
+            const updatedMetadata = {
+              type: "metadata",
+              conversationId,
+              messageId: tempMessageId,
+            };
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(updatedMetadata)}\n\n`));
+          }
+
+          // Calculate history tokens and do rate limit check
+          historyTokens = history.reduce((total, message) => {
+            return total + countTokens(message.content);
+          }, 0);
+
+          const estimatedTotalTokens = systemTokens + historyTokens + promptTokens + (promptTokens * 2);
+
+          // Check rate limits
+          const rateLimitCheck = await checkTokenRateLimit(userId, estimatedTotalTokens);
+          if (!rateLimitCheck.allowed) {
+            throw new Error(rateLimitCheck.message || "Rate limit exceeded");
+          }
+
+          // Prepare messages for LLM
+          const messagesForLLM = [
+            { role: "system", content: systemInstructions },
+            ...history.map(m => ({ role: m.author.toLowerCase(), content: m.content })),
+            { role: "user", content: userPrompt }
+          ] as OpenAI.ChatCompletionMessageParam[];
+
+          const model = modelType === "fast"
+            ? process.env.GENERATIVE_FAST_LLM_MODEL!
+            : process.env.GENERATIVE_THINK_LLM_MODEL! || "gemini-1.5-flash-latest";
+
+          // Start LLM streaming and save user message in parallel
+          const [stream] = await Promise.all([
+            openai.chat.completions.create({
+              model,
+              messages: messagesForLLM,
+              stream: true,
+            }),
+            prisma.message.create({
+              data: { author: 'USER', content: userPrompt, conversationId, createdAt: new Date() },
+            })
+          ]);
+
+          // Stream the LLM response immediately
           for await (const chunk of stream) {
             const content = chunk.choices[0]?.delta?.content || "";
             if (content) {
@@ -196,7 +220,7 @@ export async function POST(request: NextRequest) {
 
     return new Response(readableStream, {
       headers: {
-        "Content-Type": "text/plain; charset=utf-8",
+        "Content-Type": "text/event-stream; charset=utf-8",
         "Cache-Control": "no-cache",
         "Connection": "keep-alive",
       },
