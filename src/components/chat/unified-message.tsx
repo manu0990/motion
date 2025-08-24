@@ -34,6 +34,9 @@ export function UnifiedMessage({ message, onApprove, onReject, isLoading }: Unif
                 >
                   {block.content}
                 </ReactMarkdown>
+                {message.isStreaming && idx === contentBlocks.length - 1 && (
+                  <span className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-1"></span>
+                )}
               </div>
             ) : (
               <div key={idx} className="my-4">
@@ -77,8 +80,13 @@ export function UnifiedMessage({ message, onApprove, onReject, isLoading }: Unif
             )
           )
         ) : (
-          // fallback to raw ChatMessage if there’s no markdown to parse
-          <ChatMessage message={message} />
+          // fallback to raw ChatMessage if there's no markdown to parse
+          <div>
+            <ChatMessage message={message} />
+            {message.isStreaming && (
+              <span className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-1"></span>
+            )}
+          </div>
         )}
 
         {message.videoId && (
@@ -96,4 +104,3 @@ export function UnifiedMessage({ message, onApprove, onReject, isLoading }: Unif
     </div>
   );
 }
-

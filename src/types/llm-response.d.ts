@@ -7,4 +7,5 @@ export type Message = {
   timestamp: Date;
   isApproved?: boolean;
   isRejected?: boolean;
+  isStreaming?: boolean;
 };
