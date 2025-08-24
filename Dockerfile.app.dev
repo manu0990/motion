@@ -1,0 +1,26 @@
+# Simple Next.js App Dockerfile
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies
+RUN pnpm install
+
+# Copy Prisma schema
+COPY prisma ./prisma/
+
+# Generate Prisma client (this doesn't require DB connection)
+RUN pnpm db:gen
+
+# Copy source code
+COPY . .
+
+# Expose port and start
+EXPOSE 3000
+CMD ["pnpm", "dev"]
